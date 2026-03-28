@@ -9,6 +9,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.59"
+  algolia_client_core:
+    dependency: transitive
+    description:
+      name: algolia_client_core
+      sha256: ae86b33953521fa0bb5ae7c0209c2a0d40cc271c92974e6c0933c89fd8823fa0
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.47.1"
+  algolia_client_insights:
+    dependency: transitive
+    description:
+      name: algolia_client_insights
+      sha256: "2afd1bbf14ddb75848e1d2de4a348cad4bd337f00eff72a934e43f46bf869422"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.47.1"
+  algolia_client_search:
+    dependency: transitive
+    description:
+      name: algolia_client_search
+      sha256: "30f6c05207c49df788dfe3c69e1e6e97c611a9b898b4eb48f54b70aa003900a4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.47.1"
+  algolia_helper_flutter:
+    dependency: "direct main"
+    description:
+      name: algolia_helper_flutter
+      sha256: "4add0a73f476bbac3204ae1ffbb5e66f73cdaf6ae6496038256d9c56d970a7d9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.0"
+  algolia_insights:
+    dependency: transitive
+    description:
+      name: algolia_insights
+      sha256: "2d94aecfee207e8c0cb403ec9cdcf98baacdfa89054d5f2a26fbca87f358e0b4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
+  algoliasearch:
+    dependency: "direct main"
+    description:
+      name: algoliasearch
+      sha256: "1dd7905608df050785c549d0d80fb679db94fe26b9bf736748b0730912994ea5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.47.1"
+  archive:
+    dependency: transitive
+    description:
+      name: archive
+      sha256: a96e8b390886ee8abb49b7bd3ac8df6f451c621619f52a26e815fdcf568959ff
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.9"
   async:
     dependency: transitive
     description:
@@ -121,6 +177,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      sha256: aff32c08f92787a557dd5c0145ac91536481831a01b4648136373cddb0e64f8c
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.9.2"
+  dio_web_adapter:
+    dependency: transitive
+    description:
+      name: dio_web_adapter
+      sha256: "2f9e64323a7c3c7ef69567d5c800424a11f8337b8b228bad02524c9fb3c1f340"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
   fake_async:
     dependency: transitive
     description:
@@ -216,6 +288,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
+  hive:
+    dependency: transitive
+    description:
+      name: hive
+      sha256: "8dcf6db979d7933da8217edcec84e9df1bdb4e4edc7fc77dbd5aa74356d6d941"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
   hooks:
     dependency: transitive
     description:
@@ -240,6 +320,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      sha256: cb09e7dac6210041fad964ed7fbee004f14258b4eca4040f72d1234062ace4c8
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.11.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -304,6 +392,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.17.0"
+  mime:
+    dependency: transitive
+    description:
+      name: mime
+      sha256: "41a20518f0cb1256669420fdba0cd90d21561e560ac240f26ef8322e45bb7ed6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   native_toolchain_c:
     dependency: transitive
     description:
@@ -408,6 +504,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
+  posix:
+    dependency: transitive
+    description:
+      name: posix
+      sha256: "185ef7606574f789b40f289c233efa52e96dead518aed988e040a10737febb07"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.5.0"
   provider:
     dependency: "direct main"
     description:

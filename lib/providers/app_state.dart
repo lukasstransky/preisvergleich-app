@@ -1,48 +1,30 @@
 import 'package:flutter/foundation.dart';
 import '../models/product.dart';
-import '../services/firestore_service.dart';
+import '../services/algolia_service.dart';
 import '../services/shopping_list_service.dart';
 
 class AppState extends ChangeNotifier {
-  final FirestoreService _firestoreService = FirestoreService();
+  final AlgoliaService _algoliaService = AlgoliaService();
   final ShoppingListService _shoppingListService = ShoppingListService();
 
-  List<Product> _allProducts = [];
   List<Product> _searchResults = [];
   List<Product> _shoppingList = [];
   Set<String> _selectedSupermarkets = {'spar', 'billa', 'hofer', 'penny'};
   String _searchQuery = '';
-  bool _isLoading = false;
+  bool _isSearching = false;
   String? _error;
 
-  List<Product> get allProducts => _allProducts;
   List<Product> get searchResults => _searchResults;
   List<Product> get shoppingList => _shoppingList;
   Set<String> get selectedSupermarkets => _selectedSupermarkets;
   String get searchQuery => _searchQuery;
-  bool get isLoading => _isLoading;
+  bool get isSearching => _isSearching;
   String? get error => _error;
 
   static const List<String> availableSupermarkets = ['spar', 'billa', 'hofer', 'penny'];
 
   Future<void> initialize() async {
     await loadShoppingList();
-  }
-
-  Future<void> loadAllProducts() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      _allProducts = await _firestoreService.getAllProducts();
-      _applyFiltersAndSearch();
-    } catch (e) {
-      _error = 'Fehler beim Laden der Produkte: $e';
-    }
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   Future<void> loadShoppingList() async {
@@ -52,28 +34,38 @@ class AppState extends ChangeNotifier {
 
   Future<void> search(String query) async {
     _searchQuery = query;
-    
-    if (query.isEmpty) {
+    _error = null;
+
+    if (query.trim().isEmpty) {
       _searchResults = [];
+      _isSearching = false;
       notifyListeners();
       return;
     }
 
-    _isLoading = true;
-    _error = null;
+    _isSearching = true;
     notifyListeners();
 
     try {
-      _searchResults = await _firestoreService.searchProductsOnServer(
-        query,
-        limit: 50,
+      final results = await _algoliaService.searchProducts(
+        query: _searchQuery,
         supermarkets: _selectedSupermarkets,
       );
+      _searchResults = results;
+      _error = null;
     } catch (e) {
       _error = 'Fehler bei der Suche: $e';
+      _searchResults = [];
     }
 
-    _isLoading = false;
+    _isSearching = false;
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    _searchQuery = '';
+    _searchResults = [];
+    _error = null;
     notifyListeners();
   }
 
@@ -86,31 +78,25 @@ class AppState extends ChangeNotifier {
     } else {
       _selectedSupermarkets.add(lowerSupermarket);
     }
+    
     if (_searchQuery.isNotEmpty) {
       search(_searchQuery);
     }
+    notifyListeners();
   }
 
   void selectAllSupermarkets() {
     _selectedSupermarkets = Set.from(availableSupermarkets);
     if (_searchQuery.isNotEmpty) {
       search(_searchQuery);
-    } else {
-      notifyListeners();
     }
+    notifyListeners();
   }
 
-  void _applyFiltersAndSearch() {
-    var filtered = _firestoreService.filterBySupermarkets(
-      _allProducts, 
-      _selectedSupermarkets,
-    );
-    
-    if (_searchQuery.isNotEmpty) {
-      filtered = _firestoreService.searchProducts(filtered, _searchQuery);
-    }
-    
-    _searchResults = _firestoreService.sortByPrice(filtered);
+  @override
+  void dispose() {
+    _algoliaService.dispose();
+    super.dispose();
   }
 
   Future<void> addToShoppingList(Product product) async {

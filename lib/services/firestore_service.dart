@@ -34,66 +34,14 @@ class FirestoreService {
     return allProducts;
   }
 
-  Future<List<Product>> searchProductsOnServer(String query, {int limit = 50, Set<String>? supermarkets}) async {
-    if (query.isEmpty) return [];
-    
-    List<Product> results = [];
-    final collections = supermarkets != null && supermarkets.isNotEmpty
-        ? supermarkets.map((s) => '${s.toLowerCase()}_products').where((c) => _collections.contains(c)).toList()
-        : _collections;
-
-    final limitPerCollection = (limit ~/ collections.length) + 10;
-
-    for (String collection in collections) {
-      try {
-        final snapshot = await _firestore
-            .collection(collection)
-            .orderBy('name')
-            .startAt([query])
-            .endAt(['$query\uf8ff'])
-            .limit(limitPerCollection)
-            .get();
-        
-        results.addAll(snapshot.docs.map((doc) => Product.fromFirestore(doc)));
-        
-        if (query.isNotEmpty && query[0].toUpperCase() != query[0]) {
-          final capitalizedQuery = query[0].toUpperCase() + query.substring(1);
-          final snapshotCapitalized = await _firestore
-              .collection(collection)
-              .orderBy('name')
-              .startAt([capitalizedQuery])
-              .endAt(['$capitalizedQuery\uf8ff'])
-              .limit(limitPerCollection)
-              .get();
-          results.addAll(snapshotCapitalized.docs.map((doc) => Product.fromFirestore(doc)));
-        }
-      } catch (e) {
-        print('Error searching $collection: $e');
-      }
-    }
-
-    final uniqueResults = <String, Product>{};
-    for (var p in results) {
-      uniqueResults[p.id] = p;
-    }
-    
-    final sortedResults = uniqueResults.values.toList()
-      ..sort((a, b) => a.price.compareTo(b.price));
-    return sortedResults.take(limit).toList();
-  }
-
-  Future<List<Product>> getProductsFromSupermarkets(List<String> supermarkets, {int limit = 50}) async {
+  Future<List<Product>> getProductsFromSupermarkets(List<String> supermarkets) async {
     List<Product> products = [];
-    final limitPerCollection = limit ~/ supermarkets.length + 1;
 
     for (String supermarket in supermarkets) {
       final collection = '${supermarket.toLowerCase()}_products';
       if (_collections.contains(collection)) {
         try {
-          final snapshot = await _firestore
-              .collection(collection)
-              .limit(limitPerCollection)
-              .get();
+          final snapshot = await _firestore.collection(collection).get();
           products.addAll(snapshot.docs.map((doc) => Product.fromFirestore(doc)));
         } catch (e) {
           print('Error fetching $collection: $e');
@@ -101,7 +49,7 @@ class FirestoreService {
       }
     }
 
-    return products.take(limit).toList();
+    return products;
   }
 
   List<Product> searchProducts(List<Product> products, String query) {

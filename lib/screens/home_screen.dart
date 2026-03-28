@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildResultsInfo(AppState appState) {
-    if (appState.isLoading) return const SizedBox.shrink();
+    if (appState.isSearching) return const SizedBox.shrink();
     
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -112,19 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductList(AppState appState) {
-    if (appState.isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Produkte werden geladen...'),
-          ],
-        ),
-      );
-    }
-
     if (appState.error != null) {
       return Center(
         child: Column(
@@ -137,18 +124,12 @@ class _HomeScreenState extends State<HomeScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(color: Colors.red),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () => appState.loadAllProducts(),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Erneut versuchen'),
-            ),
           ],
         ),
       );
     }
 
-    if (appState.searchResults.isEmpty && appState.searchQuery.isEmpty) {
+    if (appState.searchQuery.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -165,13 +146,26 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Gib einen Suchbegriff ein um\nProdukte zu finden',
+              'Gib einen Suchbegriff ein, z.B. "Skyr" oder "Milch"',
               style: TextStyle(
                 color: Colors.grey[500],
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,
             ),
+          ],
+        ),
+      );
+    }
+
+    if (appState.isSearching) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Suche läuft...'),
           ],
         ),
       );
@@ -202,15 +196,12 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () => appState.search(appState.searchQuery),
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 16),
-        itemCount: appState.searchResults.length,
-        itemBuilder: (context, index) {
-          return ProductCard(product: appState.searchResults[index]);
-        },
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 16),
+      itemCount: appState.searchResults.length,
+      itemBuilder: (context, index) {
+        return ProductCard(product: appState.searchResults[index]);
+      },
     );
   }
 }
