@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1055914421481",
+    "project_id": "lebensmittel-scraper",
+    "storage_bucket": "lebensmittel-scraper.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1055914421481:android:9d0a58f2608ce74853d478",
+        "android_client_info": {
+          "package_name": "com.example.preisvergleich_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT-qEZz5hmwSJqfM69-FHsz55S69Ktcrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
