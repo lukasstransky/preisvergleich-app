@@ -11,64 +11,224 @@ class SearchBarWidget extends StatefulWidget {
 
 class _SearchBarWidgetState extends State<SearchBarWidget> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _showHistory = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        _showHistory = _focusNode.hasFocus && _controller.text.trim().isEmpty;
+      });
+    });
+  }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   void _onSearch() {
     final query = _controller.text.trim();
+    if (query.isEmpty) return;
+    _focusNode.unfocus();
+    setState(() => _showHistory = false);
+    context.read<AppState>().search(query);
+  }
+
+  void _onClear() {
+    _controller.clear();
+    context.read<AppState>().clearSearch();
+    setState(() => _showHistory = _focusNode.hasFocus);
+  }
+
+  void _applyHistoryQuery(String query) {
+    _controller.text = query;
+    _controller.selection =
+        TextSelection.fromPosition(TextPosition(offset: query.length));
+    _focusNode.unfocus();
+    setState(() => _showHistory = false);
     context.read<AppState>().search(query);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Expanded(
+    final appState = context.watch<AppState>();
+    final hasText = _controller.text.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(50),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
             child: TextField(
               controller: _controller,
+              focusNode: _focusNode,
+              textInputAction: TextInputAction.search,
               decoration: InputDecoration(
-                hintText: 'Produkt suchen...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _controller.clear();
-                          context.read<AppState>().clearSearch();
-                          setState(() {});
-                        },
+                hintText: 'Lebensmittel suchen...',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontWeight: FontWeight.w400,
+                  fontSize: 15,
+                ),
+                prefixIcon: GestureDetector(
+                  onTap: hasText ? _onSearch : null,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: Icon(
+                      Icons.search_rounded,
+                      color: hasText
+                          ? const Color(0xFF1B8A5A)
+                          : Colors.grey[400],
+                      size: 22,
+                    ),
+                  ),
+                ),
+                prefixIconConstraints: const BoxConstraints(minWidth: 48),
+                suffixIcon: hasText
+                    ? GestureDetector(
+                        onTap: _onClear,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close,
+                                size: 13, color: Colors.white),
+                          ),
+                        ),
                       )
                     : null,
+                suffixIconConstraints: const BoxConstraints(minWidth: 48),
+                filled: true,
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(50),
                   borderSide: BorderSide.none,
                 ),
-                filled: true,
-                fillColor: Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(50),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(50),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               ),
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) {
+                setState(() {
+                  _showHistory =
+                      _focusNode.hasFocus && _controller.text.trim().isEmpty;
+                });
+              },
               onSubmitted: (_) => _onSearch(),
-              textInputAction: TextInputAction.search,
             ),
           ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: _controller.text.trim().isNotEmpty ? _onSearch : null,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Suchen'),
+        ),
+        if (_showHistory && appState.searchHistory.isNotEmpty)
+          _buildHistoryPanel(context, appState),
+      ],
+    );
+  }
+
+  Widget _buildHistoryPanel(BuildContext context, AppState appState) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 8, 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Zuletzt gesucht',
+                  style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    appState.clearSearchHistory();
+                    setState(() => _showHistory = false);
+                  },
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    foregroundColor: Colors.grey[500],
+                  ),
+                  child: const Text('Alle löschen',
+                      style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
+          ...appState.searchHistory.map((query) => InkWell(
+                onTap: () => _applyHistoryQuery(query),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 11),
+                  child: Row(
+                    children: [
+                      Icon(Icons.history_rounded,
+                          size: 17, color: Colors.grey[400]),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(query,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500)),
+                      ),
+                      GestureDetector(
+                        onTap: () =>
+                            appState.removeFromSearchHistory(query),
+                        child:
+                            Icon(Icons.close, size: 15, color: Colors.grey[400]),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+          const SizedBox(height: 8),
         ],
       ),
     );

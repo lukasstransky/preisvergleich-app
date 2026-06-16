@@ -14,6 +14,8 @@ class Product {
   final bool inPromotion;
   final String? imageUrl;
   final String supermarket;
+  final String? normalizedCategory;
+  final int? nameLength;
 
   Product({
     required this.id,
@@ -29,6 +31,8 @@ class Product {
     required this.inPromotion,
     this.imageUrl,
     required this.supermarket,
+    this.normalizedCategory,
+    this.nameLength,
   });
 
   factory Product.fromFirestore(DocumentSnapshot doc) {
@@ -47,6 +51,8 @@ class Product {
       inPromotion: data['inPromotion'] ?? false,
       imageUrl: data['imageUrl'],
       supermarket: data['supermarket'] ?? '',
+      normalizedCategory: data['normalizedCategory'],
+      nameLength: data['nameLength'],
     );
   }
 
@@ -106,6 +112,10 @@ class Product {
         return 'Hofer';
       case 'penny':
         return 'Penny';
+      case 'lidl':
+        return 'Lidl';
+      case 'mpreis':
+        return 'MPreis';
       default:
         return supermarket;
     }

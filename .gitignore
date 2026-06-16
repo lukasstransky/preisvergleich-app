@@ -45,3 +45,25 @@ app.*.map.json
 /android/app/release
 
 firebase.json
+
+# Flutter DevTools (machine-specific)
+devtools_options.yaml
+
+# Flutter crash logs
+flutter_*.log
+
+# Raw supermarket data files (local scraping output)
+billa.json
+hofer.json
+lidl.json
+penny.json
+spar.json
+
+# macOS CocoaPods lock (generated)
+macos/Podfile.lock
+
+# Cloud Functions
+functions/node_modules/
+
+# iOS generated/signing files
+ios/Runner/RunnerDebug.entitlements

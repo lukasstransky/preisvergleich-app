@@ -1,17 +1,25 @@
-# preisvergleich_app
+# Preisvergleich App
 
-A new Flutter project.
+Flutter App zum Vergleich von Lebensmittelpreisen bei österreichischen Supermärkten (Spar, Billa, Hofer, Penny, Lidl, Mpreis).
 
-## Getting Started
+## iPhone Installation
 
-This project is a starting point for a Flutter application.
+### Einmalig per Kabel
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter run --release
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Mit verbundenem iPhone ausführen. Beim ersten Mal auf dem iPhone unter **Einstellungen → Allgemein → VPN & Geräteverwaltung** dem Entwickler-Zertifikat vertrauen ("Trust").
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Die App bleibt danach auf dem iPhone installiert und funktioniert ohne Kabel.
+
+### Updates ohne Kabel (WLAN)
+
+1. Einmalig per Kabel verbinden und Xcode öffnen
+2. **Window → Devices and Simulators** → iPhone auswählen → **"Connect via network"** aktivieren
+3. Ab dann reicht es, wenn iPhone und Mac im selben WLAN sind — `flutter run` funktioniert ohne Kabel
+
+### Hinweis
+
+Mit einem kostenlosen Apple Developer Account läuft die App nur **7 Tage**, danach muss neu installiert werden. Mit dem bezahlten Account ($99/Jahr) läuft sie **1 Jahr**.

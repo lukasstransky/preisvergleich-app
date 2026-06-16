@@ -1,10 +1,20 @@
 import 'package:algoliasearch/algoliasearch.dart';
 import '../models/product.dart';
 
+enum SortOrder { relevance, unitPrice }
+
+class SearchResult {
+  final List<Product> products;
+  final Map<String, int> categoryCounts;
+
+  SearchResult({required this.products, required this.categoryCounts});
+}
+
 class AlgoliaService {
   static const String _applicationId = 'KRWOGKZ99N';
   static const String _apiKey = 'dbe6a272ef0c4fe8233baa8ed189914e';
-  static const String _indexName = 'products';
+  static const String _indexRelevance = 'products';
+  static const String _indexUnitPrice = 'products_unitprice_asc';
 
   late final SearchClient _client;
 
@@ -12,32 +22,46 @@ class AlgoliaService {
     _client = SearchClient(appId: _applicationId, apiKey: _apiKey);
   }
 
-  Future<List<Product>> searchProducts({
+  Future<SearchResult> searchProducts({
     required String query,
     Set<String>? supermarkets,
-    int hitsPerPage = 50,
+    String? category,
+    SortOrder sortOrder = SortOrder.relevance,
+    bool onlyPromotions = false,
+    int hitsPerPage = 200,
   }) async {
     if (query.trim().isEmpty) {
-      return [];
+      return SearchResult(products: [], categoryCounts: {});
     }
 
     try {
-      String? filters;
+      final filterParts = <String>[];
+
       if (supermarkets != null && supermarkets.isNotEmpty) {
         final supermarketFilters = supermarkets
             .map((s) => 'supermarket:"$s"')
             .join(' OR ');
-        filters = supermarketFilters;
+        filterParts.add('($supermarketFilters)');
       }
 
-      // TODO: Filter funktioniert erst wenn 'supermarket' in Algolia als Facet konfiguriert ist
-      // Algolia Dashboard → Index → Configuration → Facets → supermarket hinzufügen
+      if (category != null && category.isNotEmpty) {
+        filterParts.add('normalizedCategory:"$category"');
+      }
+
+      if (onlyPromotions) {
+        filterParts.add('inPromotion:true');
+      }
+
+final filters = filterParts.isNotEmpty ? filterParts.join(' AND ') : null;
+      final indexName = sortOrder == SortOrder.unitPrice ? _indexUnitPrice : _indexRelevance;
+
       final response = await _client.searchSingleIndex(
-        indexName: _indexName,
+        indexName: indexName,
         searchParams: SearchParamsObject(
           query: query,
           hitsPerPage: hitsPerPage,
           filters: filters,
+          facets: ['normalizedCategory', 'supermarket', 'inPromotion'],
         ),
       );
 
@@ -58,12 +82,23 @@ class AlgoliaService {
           inPromotion: data['inPromotion'] ?? false,
           imageUrl: data['imageUrl'],
           supermarket: data['supermarket'] ?? '',
+          normalizedCategory: data['normalizedCategory'],
+          nameLength: data['nameLength'],
         );
       }).toList();
 
-      products.sort((a, b) => a.price.compareTo(b.price));
+      final categoryCounts = <String, int>{};
+      final facets = response.facets;
+      if (facets != null && facets.containsKey('normalizedCategory')) {
+        final categoryFacets = facets['normalizedCategory'];
+        if (categoryFacets != null) {
+          for (final entry in categoryFacets.entries) {
+            categoryCounts[entry.key] = entry.value;
+          }
+        }
+      }
 
-      return products;
+      return SearchResult(products: products, categoryCounts: categoryCounts);
     } catch (e) {
       print('Algolia search error: $e');
       rethrow;
