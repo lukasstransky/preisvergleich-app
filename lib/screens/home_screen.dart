@@ -26,7 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppState>().initialize();
     });
-    if (Firebase.apps.isNotEmpty) FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (Firebase.apps.isNotEmpty) {
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       final notification = message.notification;
       if (notification != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -52,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ));
       }
     });
+    }
   }
 
   @override

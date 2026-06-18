@@ -130,6 +130,7 @@ class PriceAlertService implements PriceAlertServiceBase {
     }
   }
 
+  @override
   Future<List<PriceAlert>> getAlerts() async {
     String? token;
     try {
@@ -171,6 +172,7 @@ class PriceAlertService implements PriceAlertServiceBase {
     return PriceAlert.fromFirestore(snapshot.docs.first);
   }
 
+  @override
   Future<void> createAlert({
     required Product product,
     required AlertType alertType,
@@ -195,6 +197,7 @@ class PriceAlertService implements PriceAlertServiceBase {
     debugPrint('[PriceAlert] Alert created successfully');
   }
 
+  @override
   Future<void> createKeywordAlert({
     required String keyword,
     required AlertType alertType,
@@ -218,6 +221,7 @@ class PriceAlertService implements PriceAlertServiceBase {
     await _firestore.collection('price_alerts').add(alert.toFirestore(token!));
   }
 
+  @override
   Future<void> deleteAlert(String alertId) async {
     await _firestore
         .collection('price_alerts')

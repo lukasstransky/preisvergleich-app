@@ -34,6 +34,7 @@ class AlgoliaService implements AlgoliaServiceBase {
     _client = SearchClient(appId: _applicationId, apiKey: _apiKey);
   }
 
+  @override
   Future<SearchResult> searchProducts({
     required String query,
     Set<String>? supermarkets,
@@ -117,6 +118,7 @@ final filters = filterParts.isNotEmpty ? filterParts.join(' AND ') : null;
     }
   }
 
+  @override
   void dispose() {
     _client.dispose();
   }

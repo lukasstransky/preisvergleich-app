@@ -6,6 +6,7 @@ import 'package:preisvergleich_app/providers/app_state.dart';
 import 'package:preisvergleich_app/screens/home_screen.dart';
 import 'package:preisvergleich_app/services/algolia_service.dart';
 import 'package:preisvergleich_app/services/price_alert_service.dart';
+import 'package:preisvergleich_app/widgets/search_bar_widget.dart';
 import 'mock_algolia_service.dart';
 import 'mock_price_alert_service.dart';
 
