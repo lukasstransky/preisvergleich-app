@@ -5,7 +5,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/price_alert.dart';
 import '../models/product.dart';
 
-class PriceAlertService {
+abstract class PriceAlertServiceBase {
+  Future<List<PriceAlert>> getAlerts();
+  Future<void> createAlert({
+    required Product product,
+    required AlertType alertType,
+    double? targetPrice,
+  });
+  Future<void> createKeywordAlert({
+    required String keyword,
+    required AlertType alertType,
+    double? targetPrice,
+  });
+  Future<void> deleteAlert(String alertId);
+}
+
+class PriceAlertService implements PriceAlertServiceBase {
   static const String _tokenKey = 'fcm_token';
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

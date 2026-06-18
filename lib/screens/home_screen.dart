@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import '../models/price_alert.dart';
@@ -25,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppState>().initialize();
     });
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (Firebase.apps.isNotEmpty) FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       final notification = message.notification;
       if (notification != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

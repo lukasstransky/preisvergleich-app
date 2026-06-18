@@ -10,7 +10,19 @@ class SearchResult {
   SearchResult({required this.products, required this.categoryCounts});
 }
 
-class AlgoliaService {
+abstract class AlgoliaServiceBase {
+  Future<SearchResult> searchProducts({
+    required String query,
+    Set<String>? supermarkets,
+    String? category,
+    SortOrder sortOrder = SortOrder.relevance,
+    bool onlyPromotions = false,
+    int hitsPerPage = 200,
+  });
+  void dispose();
+}
+
+class AlgoliaService implements AlgoliaServiceBase {
   static const String _applicationId = 'KRWOGKZ99N';
   static const String _apiKey = 'dbe6a272ef0c4fe8233baa8ed189914e';
   static const String _indexRelevance = 'products';

@@ -10,11 +10,23 @@ import '../services/price_alert_service.dart';
 import '../services/favorites_service.dart';
 
 class AppState extends ChangeNotifier {
-  final AlgoliaService _algoliaService = AlgoliaService();
-  final ShoppingListService _shoppingListService = ShoppingListService();
-  final SearchHistoryService _searchHistoryService = SearchHistoryService();
-  final PriceAlertService _priceAlertService = PriceAlertService();
-  final FavoritesService _favoritesService = FavoritesService();
+  final AlgoliaServiceBase _algoliaService;
+  final ShoppingListService _shoppingListService;
+  final SearchHistoryService _searchHistoryService;
+  final PriceAlertServiceBase _priceAlertService;
+  final FavoritesService _favoritesService;
+
+  AppState({
+    AlgoliaServiceBase? algoliaService,
+    ShoppingListService? shoppingListService,
+    SearchHistoryService? searchHistoryService,
+    PriceAlertServiceBase? priceAlertService,
+    FavoritesService? favoritesService,
+  })  : _algoliaService = algoliaService ?? AlgoliaService(),
+        _shoppingListService = shoppingListService ?? ShoppingListService(),
+        _searchHistoryService = searchHistoryService ?? SearchHistoryService(),
+        _priceAlertService = priceAlertService ?? PriceAlertService(),
+        _favoritesService = favoritesService ?? FavoritesService();
 
   // Search
   List<Product> _searchResults = [];
