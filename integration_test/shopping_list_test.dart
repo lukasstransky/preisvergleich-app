@@ -136,21 +136,22 @@ void main() {
 
       expect(find.byType(ShoppingListScreen), findsOneWidget);
 
-      // Tap 'Alle Listen' button
-      await tester.tap(find.text('Alle Listen'));
+      // Tap the 'Alle Listen' icon button (Icons.list_alt)
+      await tester.tap(find.byIcon(Icons.list_alt));
       await tester.pumpAndSettle();
 
-      // Tap FAB to create new list
-      await tester.tap(find.byType(FloatingActionButton));
+      // Tap the 'Neue Liste' FAB
+      await tester.tap(find.widgetWithText(FloatingActionButton, 'Neue Liste'));
       await tester.pumpAndSettle();
 
-      // Enter new list name
+      // Enter new list name in the dialog
       await tester.enterText(find.byType(TextField).last, 'Wocheneinkauf');
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Erstellen'));
       await tester.pumpAndSettle();
 
+      // After creation the screen is popped back; the active list name is shown
       expect(find.text('Wocheneinkauf'), findsWidgets);
     });
   });

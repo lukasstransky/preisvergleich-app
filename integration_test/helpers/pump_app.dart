@@ -74,6 +74,11 @@ class _TestApp extends StatelessWidget {
 Future<void> performSearch(WidgetTester tester, String query) async {
   await tester.enterText(find.byType(TextField).first, query);
   await tester.pumpAndSettle();
-  await tester.tap(find.byIcon(Icons.search_rounded));
+  // Scope the search icon to the SearchBarWidget to avoid ambiguity with
+  // other search icons on screen (e.g. the keyword alert icon in _AlertTile).
+  await tester.tap(find.descendant(
+    of: find.byType(SearchBarWidget),
+    matching: find.byIcon(Icons.search_rounded),
+  ));
   await tester.pumpAndSettle();
 }

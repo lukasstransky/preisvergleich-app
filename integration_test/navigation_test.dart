@@ -24,8 +24,7 @@ void main() {
       expect(find.byType(FavoritesScreen), findsOneWidget);
       expect(find.text('Favoriten'), findsOneWidget);
 
-      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-      navigator.pop();
+      await tester.pageBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Preisvergleich'), findsOneWidget);
@@ -40,8 +39,7 @@ void main() {
       expect(find.byType(PriceAlertsScreen), findsOneWidget);
       expect(find.text('Preisalarme'), findsOneWidget);
 
-      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-      navigator.pop();
+      await tester.pageBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Preisvergleich'), findsOneWidget);
@@ -55,8 +53,7 @@ void main() {
 
       expect(find.byType(ShoppingListScreen), findsOneWidget);
 
-      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-      navigator.pop();
+      await tester.pageBack();
       await tester.pumpAndSettle();
 
       expect(find.text('Preisvergleich'), findsOneWidget);
@@ -100,8 +97,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Go back
-      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-      navigator.pop();
+      await tester.pageBack();
       await tester.pumpAndSettle();
 
       // Results should still be visible

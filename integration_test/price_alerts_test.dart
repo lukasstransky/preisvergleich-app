@@ -77,9 +77,8 @@ void main() {
       await tester.tap(find.text('Speichern'));
       await tester.pumpAndSettle();
 
-      // Dismiss snackbar and navigate to alerts
-      await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded).first,
-          warnIfMissed: false);
+      // Dismiss the modal bottom sheet with the system back gesture
+      await tester.pageBack();
       await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.notifications_none_rounded));
@@ -123,9 +122,8 @@ void main() {
 
       expect(find.text('Vollmilch 1L'), findsOneWidget);
 
-      // Swipe to delete or tap delete icon
-      await tester.drag(
-          find.text('Vollmilch 1L'), const Offset(-300, 0));
+      // Tap the notifications_off IconButton to remove the alert
+      await tester.tap(find.byIcon(Icons.notifications_off_outlined));
       await tester.pumpAndSettle();
 
       expect(find.text('Vollmilch 1L'), findsNothing);
