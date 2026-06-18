@@ -6,7 +6,6 @@ import '../services/algolia_service.dart';
 class FilterSection extends StatelessWidget {
   const FilterSection({super.key});
 
-  static const _primary = Color(0xFF1B8A5A);
   static const _chipHeight = 32.0;
 
   @override
@@ -260,16 +259,3 @@ class _CategoryChip extends StatelessWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Container(
-        width: 1,
-        height: 16,
-        color: const Color(0xFFDDE0E8),
-      ),
-    );
-  }
-}

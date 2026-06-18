@@ -37,8 +37,6 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     }
   }
 
-  bool _useDarkText(String supermarket) => supermarket.toLowerCase() == 'billa';
-
   String _displayName(String supermarket) {
     switch (supermarket.toLowerCase()) {
       case 'spar':   return 'Spar';

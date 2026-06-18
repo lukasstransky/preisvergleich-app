@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/shopping_list.dart';
-import '../models/shopping_list_item.dart';
-import '../models/product.dart';
 
 class ShoppingListService {
   static const String _listsKey = 'shopping_lists_v2';
