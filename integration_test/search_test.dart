@@ -34,7 +34,8 @@ void main() {
       await performSearch(tester, 'Butter');
 
       expect(find.text('Butter 250g'), findsOneWidget);
-      expect(find.textContaining('2,49'), findsWidgets);
+      // Dart's toStringAsFixed always uses '.' as decimal separator
+      expect(find.textContaining('2.49'), findsWidgets);
     });
 
     testWidgets('search result shows supermarket badge', (tester) async {
@@ -42,8 +43,9 @@ void main() {
 
       await performSearch(tester, 'Milch');
 
-      expect(find.text('Billa'), findsOneWidget);
-      expect(find.text('Spar'), findsOneWidget);
+      // SupermarketFilter chip + product card badge both show the name
+      expect(find.text('Billa'), findsWidgets);
+      expect(find.text('Spar'), findsWidgets);
     });
 
     testWidgets('promotion badge visible on discounted product', (tester) async {

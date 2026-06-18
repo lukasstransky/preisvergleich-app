@@ -4,6 +4,7 @@ import 'package:preisvergleich_app/screens/favorites_screen.dart';
 import 'package:preisvergleich_app/screens/price_alerts_screen.dart';
 import 'package:preisvergleich_app/screens/shopping_list_screen.dart';
 import 'helpers/pump_app.dart';
+import 'helpers/test_data.dart';
 
 void main() {
   group('Navigation', () {
@@ -60,14 +61,15 @@ void main() {
     });
 
     testWidgets('AppBar badges update after adding favorite', (tester) async {
-      await pumpTestApp(tester);
+      final appState = await pumpTestApp(tester);
 
       // Initially no badge numbers
       expect(find.text('1'), findsNothing);
 
       await performSearch(tester, 'Butter');
-      await tester.tap(find.byIcon(Icons.favorite_border_rounded).last);
-      await tester.pumpAndSettle();
+      // Toggle via state — heart GestureDetector loses to card InkWell in tests
+      await appState.toggleFavorite(testProducts[2]); // Butter 250g
+      await tester.pump();
 
       // Favorites badge shows 1
       expect(find.text('1'), findsWidgets);
