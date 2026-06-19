@@ -77,8 +77,8 @@ void main() {
       await tester.tap(find.text('Speichern'));
       await tester.pumpAndSettle();
 
-      // Dismiss the modal bottom sheet with the system back gesture
-      await tester.pageBack();
+      // Dismiss the product detail bottom sheet by tapping the scrim above it
+      await tester.tapAt(const Offset(200, 80));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byIcon(Icons.notifications_none_rounded));

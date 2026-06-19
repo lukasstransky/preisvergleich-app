@@ -94,12 +94,12 @@ void main() {
       await performSearch(tester, 'Milch');
       expect(find.text('Vollmilch 1L'), findsOneWidget);
 
-      // Navigate to favorites
-      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first);
+      // Navigate to favorites via the AppBar IconButton (not a card icon)
+      await tester.tap(find.widgetWithIcon(IconButton, Icons.favorite_border_rounded));
       await tester.pumpAndSettle();
 
       // Go back
-      await tester.pageBack();
+      await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
 
       // Results should still be visible

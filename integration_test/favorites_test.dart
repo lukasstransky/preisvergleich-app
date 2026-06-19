@@ -26,7 +26,8 @@ void main() {
       await appState.toggleFavorite(testProducts[2]); // Butter 250g
       await tester.pump();
 
-      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+      // AppBar icon also switches to filled heart when favorites exist → findsWidgets
+      expect(find.byIcon(Icons.favorite_rounded), findsWidgets);
     });
 
     testWidgets('favorited product updates favorites badge in AppBar',

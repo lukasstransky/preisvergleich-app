@@ -86,8 +86,8 @@ void main() {
       expect(find.text('Vollmilch 1L'), findsOneWidget);
       expect(find.text('Bio Vollmilch 1L'), findsOneWidget);
 
-      // Deselect Spar (tap the Spar chip)
-      await tester.tap(find.text('Spar'));
+      // Deselect Spar (tap the Spar chip — .first targets the filter chip, not product badges)
+      await tester.tap(find.text('Spar').first);
       await tester.pumpAndSettle();
 
       // Bio Vollmilch from Spar should no longer appear

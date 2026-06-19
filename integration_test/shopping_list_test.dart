@@ -52,8 +52,8 @@ void main() {
       await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
       await tester.pumpAndSettle();
 
-      // Total should contain the price 2.49
-      expect(find.textContaining('2,49'), findsWidgets);
+      // Total should contain the price (dot separator — Dart's toStringAsFixed is locale-independent)
+      expect(find.textContaining('2.49'), findsWidgets);
     });
 
     testWidgets('increment quantity updates count on product card',
