@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../models/price_alert.dart';
 import '../providers/app_state.dart';
+import 'price_history_chart.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -454,7 +455,8 @@ class _ProductDetailSheet extends StatelessWidget {
             top: 12,
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -574,6 +576,7 @@ class _ProductDetailSheet extends StatelessWidget {
                   style: TextStyle(color: Colors.grey[400], fontSize: 12),
                 ),
               ],
+              PriceHistoryChart(product: product),
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 16),
@@ -585,6 +588,7 @@ class _ProductDetailSheet extends StatelessWidget {
                 _SetAlertButton(
                     context: context, product: product),
             ],
+          ),
           ),
         );
       },

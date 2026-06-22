@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/price_history_entry.dart';
 import '../models/product.dart';
 
 class FirestoreService {
@@ -73,9 +74,28 @@ class FirestoreService {
 
   List<Product> sortByPrice(List<Product> products, {bool ascending = true}) {
     final sorted = List<Product>.from(products);
-    sorted.sort((a, b) => ascending 
-        ? a.price.compareTo(b.price) 
+    sorted.sort((a, b) => ascending
+        ? a.price.compareTo(b.price)
         : b.price.compareTo(a.price));
     return sorted;
+  }
+
+  Future<List<PriceHistoryEntry>> getPriceHistory(
+      String supermarket, String productId) async {
+    final collection = '${supermarket.toLowerCase()}_products';
+    if (!_collections.contains(collection)) return [];
+    try {
+      final snapshot = await _firestore
+          .collection(collection)
+          .doc(productId)
+          .collection('price_history')
+          .orderBy('date')
+          .get();
+      return snapshot.docs
+          .map((doc) => PriceHistoryEntry.fromFirestore(doc.data()))
+          .toList();
+    } catch (_) {
+      return [];
+    }
   }
 }

@@ -52,6 +52,7 @@ dependencies:
   # Algolia Search
   algolia_helper_flutter: ^1.0.0
   algoliasearch: ^1.0.0
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:

@@ -8,9 +8,7 @@ import '../widgets/product_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/supermarket_filter.dart';
 import '../widgets/filter_section.dart';
-import 'shopping_list_screen.dart';
 import 'price_alerts_screen.dart';
-import 'favorites_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,61 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Preisvergleich'),
         centerTitle: true,
-        actions: [
-          Consumer<AppState>(
-            builder: (_, appState, __) => IconButton(
-              icon: Badge(
-                isLabelVisible: appState.favorites.isNotEmpty,
-                label: Text('${appState.favorites.length}',
-                    style: const TextStyle(fontSize: 10)),
-                child: const Icon(Icons.favorite_border_rounded),
-              ),
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const FavoritesScreen())),
-            ),
-          ),
-          Consumer<AppState>(
-            builder: (_, appState, __) => IconButton(
-              icon: Badge(
-                isLabelVisible: appState.priceAlerts.isNotEmpty,
-                label: Text('${appState.priceAlerts.length}',
-                    style: const TextStyle(fontSize: 10)),
-                child: const Icon(Icons.notifications_none_rounded),
-              ),
-              onPressed: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const PriceAlertsScreen())),
-            ),
-          ),
-          Consumer<AppState>(
-            builder: (_, appState, __) => Stack(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => const ShoppingListScreen())),
-                ),
-                if (appState.shoppingListItemCount > 0)
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                          color: Color(0xFFE53935), shape: BoxShape.circle),
-                      child: Text(
-                        '${appState.shoppingListItemCount}',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 4),
-        ],
+        actions: const [],
       ),
       body: Column(
         children: [
