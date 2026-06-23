@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/product.dart';
 import '../models/price_alert.dart';
 import '../providers/app_state.dart';
@@ -574,6 +575,47 @@ class _ProductDetailSheet extends StatelessWidget {
                 Text(
                   product.category!,
                   style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                ),
+              ],
+              if (product.formattedOfferPeriod != null) ...[
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today_rounded,
+                        size: 13, color: Colors.grey[400]),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Angebot: ${product.formattedOfferPeriod!}',
+                      style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ],
+              if (product.productUrl != null) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                    label: Text(
+                      'Auf ${product.supermarketDisplayName} ansehen',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.grey[700],
+                      side: BorderSide(color: Colors.grey[300]!),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () async {
+                      final uri = Uri.tryParse(product.productUrl!);
+                      if (uri != null) await launchUrl(uri);
+                    },
+                  ),
                 ),
               ],
               PriceHistoryChart(product: product),

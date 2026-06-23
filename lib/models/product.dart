@@ -16,6 +16,9 @@ class Product {
   final String supermarket;
   final String? normalizedCategory;
   final int? nameLength;
+  final String? productUrl;
+  final String? offerStart;
+  final String? offerEnd;
 
   Product({
     required this.id,
@@ -33,6 +36,9 @@ class Product {
     required this.supermarket,
     this.normalizedCategory,
     this.nameLength,
+    this.productUrl,
+    this.offerStart,
+    this.offerEnd,
   });
 
   factory Product.fromFirestore(DocumentSnapshot doc) {
@@ -53,6 +59,9 @@ class Product {
       supermarket: data['supermarket'] ?? '',
       normalizedCategory: data['normalizedCategory'],
       nameLength: data['nameLength'],
+      productUrl: data['productUrl'],
+      offerStart: data['offerStart'],
+      offerEnd: data['offerEnd'],
     );
   }
 
@@ -71,6 +80,9 @@ class Product {
       inPromotion: json['inPromotion'] ?? false,
       imageUrl: json['imageUrl'],
       supermarket: json['supermarket'] ?? '',
+      productUrl: json['productUrl'],
+      offerStart: json['offerStart'],
+      offerEnd: json['offerEnd'],
     );
   }
 
@@ -89,6 +101,9 @@ class Product {
       'inPromotion': inPromotion,
       'imageUrl': imageUrl,
       'supermarket': supermarket,
+      'productUrl': productUrl,
+      'offerStart': offerStart,
+      'offerEnd': offerEnd,
     };
   }
 
@@ -101,6 +116,34 @@ class Product {
       unitPrice != null && unitLabel != null 
           ? '€${unitPrice!.toStringAsFixed(2)}/$unitLabel' 
           : null;
+
+  String? get formattedOfferPeriod {
+    final start = _parseDate(offerStart);
+    final end = _parseDate(offerEnd);
+    if (start == null && end == null) return null;
+    if (start != null && end != null) {
+      return '${_formatDate(start)} – ${_formatDate(end)}';
+    }
+    if (end != null) return 'bis ${_formatDate(end)}';
+    return 'ab ${_formatDate(start!)}';
+  }
+
+  static DateTime? _parseDate(String? s) {
+    if (s == null) return null;
+    try {
+      return DateTime.parse(s);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static String _formatDate(DateTime d) {
+    const months = [
+      'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez',
+    ];
+    return '${d.day}. ${months[d.month - 1]}';
+  }
 
   String get supermarketDisplayName {
     switch (supermarket.toLowerCase()) {

@@ -50,6 +50,25 @@ void main() {
       expect(p.sku, 'SKU123');
       expect(p.imageUrl, 'https://example.com/img.jpg');
     });
+
+    test('parses productUrl, offerStart, offerEnd', () {
+      final p = Product.fromJson({
+        ..._base,
+        'productUrl': 'https://www.spar.at/produkt/milch',
+        'offerStart': '2026-06-23',
+        'offerEnd': '2026-06-30',
+      });
+      expect(p.productUrl, 'https://www.spar.at/produkt/milch');
+      expect(p.offerStart, '2026-06-23');
+      expect(p.offerEnd, '2026-06-30');
+    });
+
+    test('productUrl, offerStart, offerEnd default to null', () {
+      final p = Product.fromJson(_base);
+      expect(p.productUrl, isNull);
+      expect(p.offerStart, isNull);
+      expect(p.offerEnd, isNull);
+    });
   });
 
   group('Product.toJson / fromJson round-trip', () {
@@ -68,6 +87,9 @@ void main() {
         inPromotion: true,
         imageUrl: 'https://example.com/butter.jpg',
         supermarket: 'billa',
+        productUrl: 'https://www.billa.at/produkte/butter',
+        offerStart: '2026-06-23',
+        offerEnd: '2026-06-30',
       );
       final rt = Product.fromJson(original.toJson());
       expect(rt.id, original.id);
@@ -83,6 +105,9 @@ void main() {
       expect(rt.inPromotion, original.inPromotion);
       expect(rt.imageUrl, original.imageUrl);
       expect(rt.supermarket, original.supermarket);
+      expect(rt.productUrl, original.productUrl);
+      expect(rt.offerStart, original.offerStart);
+      expect(rt.offerEnd, original.offerEnd);
     });
 
     test('null optional fields survive round-trip', () {
@@ -93,6 +118,9 @@ void main() {
       expect(rt.unitPrice, isNull);
       expect(rt.unitLabel, isNull);
       expect(rt.imageUrl, isNull);
+      expect(rt.productUrl, isNull);
+      expect(rt.offerStart, isNull);
+      expect(rt.offerEnd, isNull);
     });
   });
 
@@ -148,6 +176,58 @@ void main() {
         unitLabel: 'kg',
       );
       expect(p.formattedUnitPrice, '€2.50/kg');
+    });
+  });
+
+  group('Product.formattedOfferPeriod', () {
+    test('is null when neither offerStart nor offerEnd is set', () {
+      final p = Product.fromJson(_base);
+      expect(p.formattedOfferPeriod, isNull);
+    });
+
+    test('shows "bis <date>" when only offerEnd is set', () {
+      final p = Product.fromJson({..._base, 'offerEnd': '2026-06-30'});
+      expect(p.formattedOfferPeriod, 'bis 30. Jun');
+    });
+
+    test('shows "ab <date>" when only offerStart is set', () {
+      final p = Product.fromJson({..._base, 'offerStart': '2026-06-23'});
+      expect(p.formattedOfferPeriod, 'ab 23. Jun');
+    });
+
+    test('shows "<start> – <end>" when both are set', () {
+      final p = Product.fromJson({
+        ..._base,
+        'offerStart': '2026-06-23',
+        'offerEnd': '2026-06-30',
+      });
+      expect(p.formattedOfferPeriod, '23. Jun – 30. Jun');
+    });
+
+    test('shows correct month names', () {
+      final cases = {
+        '2026-01-05': '5. Jan',
+        '2026-02-14': '14. Feb',
+        '2026-03-01': '1. Mär',
+        '2026-04-10': '10. Apr',
+        '2026-05-20': '20. Mai',
+        '2026-07-04': '4. Jul',
+        '2026-08-15': '15. Aug',
+        '2026-09-22': '22. Sep',
+        '2026-10-31': '31. Okt',
+        '2026-11-11': '11. Nov',
+        '2026-12-24': '24. Dez',
+      };
+      for (final entry in cases.entries) {
+        final p = Product.fromJson({..._base, 'offerEnd': entry.key});
+        expect(p.formattedOfferPeriod, 'bis ${entry.value}',
+            reason: 'failed for date ${entry.key}');
+      }
+    });
+
+    test('is null when offerEnd is an invalid date string', () {
+      final p = Product.fromJson({..._base, 'offerEnd': 'not-a-date'});
+      expect(p.formattedOfferPeriod, isNull);
     });
   });
 
