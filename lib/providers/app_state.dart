@@ -64,6 +64,9 @@ class AppState extends ChangeNotifier {
   Map<String, int> get categoryCounts => _categoryCounts;
   List<String> get searchHistory => _searchHistory;
 
+  Set<String> get supermarketsInResults =>
+      _searchResults.map((p) => p.supermarket.toLowerCase()).toSet();
+
   List<String> get availableCategories {
     final sorted = _categoryCounts.keys.toList()
       ..sort((a, b) =>

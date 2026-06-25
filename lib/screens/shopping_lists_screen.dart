@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
+import '../theme/app_colors.dart';
 
 class ShoppingListsScreen extends StatelessWidget {
   const ShoppingListsScreen({super.key});
@@ -29,18 +30,18 @@ class ShoppingListsScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: isActive
-                        ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
+                        ? BorderSide(color: AppColors.primary, width: 2)
                         : BorderSide.none,
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     leading: CircleAvatar(
                       backgroundColor: isActive
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey[200],
+                          ? AppColors.primary
+                          : AppColors.surfaceHigh,
                       child: Icon(
                         Icons.shopping_cart,
-                        color: isActive ? Colors.white : Colors.grey[600],
+                        color: isActive ? AppColors.onPrimary : AppColors.textSecondary,
                         size: 20,
                       ),
                     ),
@@ -52,7 +53,7 @@ class ShoppingListsScreen extends StatelessWidget {
                     ),
                     subtitle: Text(
                       '${list.itemCount} Artikel · €${list.total.toStringAsFixed(2)}',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -63,7 +64,7 @@ class ShoppingListsScreen extends StatelessWidget {
                         ),
                         if (appState.lists.length > 1)
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                            icon: const Icon(Icons.delete_outline, size: 20, color: AppColors.danger),
                             onPressed: () => _showDeleteConfirmation(context, appState, list.id, list.name),
                           ),
                       ],
@@ -169,7 +170,7 @@ class ShoppingListsScreen extends StatelessWidget {
               appState.deleteList(id);
               Navigator.pop(context);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
             child: const Text('Löschen'),
           ),
         ],

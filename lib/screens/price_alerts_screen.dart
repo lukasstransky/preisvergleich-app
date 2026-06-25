@@ -3,9 +3,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../models/price_alert.dart';
+import '../theme/app_colors.dart';
 
 class PriceAlertsScreen extends StatelessWidget {
-  const PriceAlertsScreen({super.key});
+  final VoidCallback? onGoToSearch;
+
+  const PriceAlertsScreen({super.key, this.onGoToSearch});
 
   @override
   Widget build(BuildContext context) {
@@ -18,45 +21,142 @@ class PriceAlertsScreen extends StatelessWidget {
           final alerts = appState.priceAlerts;
 
           if (alerts.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      shape: BoxShape.circle,
+            return Column(
+              children: [
+                _SearchPromoBanner(onGoToSearch: onGoToSearch),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceAlt,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.notifications_none,
+                              size: 40, color: AppColors.textTertiary),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('Keine Preisalarme',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary)),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tippe auf ein Produkt und setze einen\nPreisalarm um benachrichtigt zu werden.',
+                          textAlign: TextAlign.center,
+                          style:
+                              TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                        ),
+                      ],
                     ),
-                    child: Icon(Icons.notifications_none,
-                        size: 40, color: Colors.grey[400]),
                   ),
-                  const SizedBox(height: 16),
-                  const Text('Keine Preisalarme',
-                      style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tippe auf ein Produkt und setze einen\nPreisalarm um benachrichtigt zu werden.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  ),
-                ],
-              ),
+                ),
+              ],
             );
           }
 
           return ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: alerts.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemCount: alerts.length + 1,
+            separatorBuilder: (_, index) =>
+                index == 0 ? const SizedBox.shrink() : const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              final alert = alerts[index];
-              return _AlertTile(alert: alert);
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _SearchPromoBanner(onGoToSearch: onGoToSearch),
+                );
+              }
+              return _AlertTile(alert: alerts[index - 1]);
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _SearchPromoBanner extends StatelessWidget {
+  final VoidCallback? onGoToSearch;
+
+  const _SearchPromoBanner({this.onGoToSearch});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.primary, Color(0xFF177A50)],
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.notifications_active_rounded,
+                color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Kein Angebot mehr verpassen!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Produkt oder Suchbegriff speichern & sofort benachrichtigt werden.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: onGoToSearch,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'Zur Suche',
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -67,24 +167,7 @@ class _AlertTile extends StatelessWidget {
 
   const _AlertTile({required this.alert});
 
-  Color _getSupermarketColor(String supermarket) {
-    switch (supermarket.toLowerCase()) {
-      case 'spar':
-        return const Color(0xFF006633);
-      case 'billa':
-        return const Color(0xFFFFCC00);
-      case 'hofer':
-        return const Color(0xFF004A99);
-      case 'penny':
-        return const Color(0xFFCD1719);
-      case 'lidl':
-        return const Color(0xFF0050AA);
-      case 'mpreis':
-        return const Color(0xFFE30613);
-      default:
-        return Colors.grey;
-    }
-  }
+  Color _getSupermarketColor(String supermarket) => AppColors.supermarket(supermarket);
 
   @override
   Widget build(BuildContext context) {
@@ -100,10 +183,10 @@ class _AlertTile extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1B8A5A).withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.search, color: Color(0xFF1B8A5A), size: 28),
+                child: const Icon(Icons.search, color: AppColors.primary, size: 28),
               )
             else if (alert.imageUrl != null)
               ClipRRect(
@@ -115,8 +198,8 @@ class _AlertTile extends StatelessWidget {
                     imageUrl: alert.imageUrl!,
                     fit: BoxFit.cover,
                     errorWidget: (_, __, ___) => Container(
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.shopping_basket, color: Colors.grey),
+                      color: AppColors.surfaceAlt,
+                      child: const Icon(Icons.shopping_basket, color: AppColors.textTertiary),
                     ),
                   ),
                 ),
@@ -126,10 +209,10 @@ class _AlertTile extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.shopping_basket, color: Colors.grey),
+                child: const Icon(Icons.shopping_basket, color: AppColors.textTertiary),
               ),
             const SizedBox(width: 12),
             Expanded(
@@ -153,15 +236,15 @@ class _AlertTile extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1B8A5A).withValues(alpha: 0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                                color: const Color(0xFF1B8A5A).withValues(alpha: 0.4)),
+                                color: AppColors.primary.withValues(alpha: 0.4)),
                           ),
                           child: const Text(
                             'Suchbegriff',
                             style: TextStyle(
-                                color: Color(0xFF1B8A5A),
+                                color: AppColors.primary,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -188,13 +271,13 @@ class _AlertTile extends StatelessWidget {
                             ? Icons.local_offer_outlined
                             : Icons.price_check,
                         size: 13,
-                        color: const Color(0xFF1B8A5A),
+                        color: AppColors.primary,
                       ),
                       const SizedBox(width: 3),
                       Text(
                         alert.alertDescription,
                         style: const TextStyle(
-                            color: Color(0xFF1B8A5A),
+                            color: AppColors.primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w500),
                       ),
@@ -204,7 +287,7 @@ class _AlertTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Aktuell: €${alert.currentPrice.toStringAsFixed(2)}',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
                     ),
                   ],
                 ],
@@ -212,7 +295,7 @@ class _AlertTile extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.notifications_off_outlined,
-                  color: Colors.red, size: 22),
+                  color: AppColors.danger, size: 22),
               tooltip: 'Alarm entfernen',
               onPressed: () async {
                 if (alert.isKeywordAlert) {

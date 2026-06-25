@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../models/price_history_entry.dart';
 import '../models/product.dart';
 import '../services/firestore_service.dart';
+import '../theme/app_colors.dart';
 
 class PriceHistoryChart extends StatefulWidget {
   final Product product;
@@ -23,7 +24,7 @@ class PriceHistoryChart extends StatefulWidget {
 }
 
 class _PriceHistoryChartState extends State<PriceHistoryChart> {
-  static const _green = Color(0xFF1B8A5A);
+  static const _green = AppColors.primary;
 
   List<PriceHistoryEntry>? _history;
 
@@ -51,7 +52,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
         height: 100,
         child: Center(
           child: CircularProgressIndicator(
-              strokeWidth: 1.5, color: Color(0xFF1B8A5A)),
+              strokeWidth: 1.5, color: AppColors.primary),
         ),
       );
     }
@@ -93,7 +94,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF111827)),
+                    color: AppColors.textPrimary),
               ),
             ],
           ),
@@ -122,7 +123,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                         radius: 5,
                         color: _green,
                         strokeWidth: 2,
-                        strokeColor: Colors.white,
+                        strokeColor: AppColors.surface,
                       ),
                     ),
                     belowBarData: BarAreaData(
@@ -150,7 +151,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                           child: Text(
                             '€${value.toStringAsFixed(2)}',
                             style: TextStyle(
-                                fontSize: 10, color: Colors.grey[500]),
+                                fontSize: 10, color: AppColors.textSecondary),
                             textAlign: TextAlign.right,
                           ),
                         );
@@ -176,7 +177,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                           child: Text(
                             '${parts[2]}.${parts[1]}.',
                             style: TextStyle(
-                                fontSize: 10, color: Colors.grey[500]),
+                                fontSize: 10, color: AppColors.textSecondary),
                           ),
                         );
                       },
@@ -188,7 +189,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                   drawVerticalLine: false,
                   horizontalInterval: yInterval,
                   getDrawingHorizontalLine: (_) => FlLine(
-                    color: Colors.grey.withValues(alpha: 0.12),
+                    color: AppColors.border,
                     strokeWidth: 1,
                   ),
                 ),

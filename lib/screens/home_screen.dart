@@ -8,6 +8,7 @@ import '../widgets/product_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/supermarket_filter.dart';
 import '../widgets/filter_section.dart';
+import '../theme/app_colors.dart';
 import 'price_alerts_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -66,31 +67,27 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          DecoratedBox(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF1B8A5A), Color(0xFF177A50)],
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.bg,
+              border: Border(
+                bottom: BorderSide(color: AppColors.border),
               ),
             ),
             child: Column(
               children: [
-                const SearchBarWidget(),
-                const SupermarketFilter(),
+                SearchBarWidget(),
+                SupermarketFilter(),
               ],
             ),
           ),
           if (appState.searchQuery.isNotEmpty)
             DecoratedBox(
               decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Color(0x0A000000),
-                      blurRadius: 6,
-                      offset: Offset(0, 3)),
-                ],
+                color: AppColors.surface,
+                border: Border(
+                  bottom: BorderSide(color: AppColors.border),
+                ),
               ),
               child: Column(
                 children: [
@@ -117,24 +114,24 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFF1B8A5A).withValues(alpha: 0.08),
+          color: AppColors.primarySoft,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF1B8A5A).withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.notifications_active, size: 16, color: Color(0xFF1B8A5A)),
+            const Icon(Icons.notifications_active, size: 16, color: AppColors.primary),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Alarm für "$query" · ${existingAlert.alertDescription}',
                 style: const TextStyle(
-                    fontSize: 12, color: Color(0xFF1B8A5A), fontWeight: FontWeight.w500),
+                    fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w500),
               ),
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
+                foregroundColor: AppColors.danger,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -154,20 +151,20 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AppColors.surfaceAlt,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: AppColors.border),
           ),
           child: Row(
             children: [
-              Icon(Icons.notifications_none, size: 16, color: Colors.grey[600]),
+              const Icon(Icons.notifications_none, size: 16, color: AppColors.textSecondary),
               const SizedBox(width: 8),
               Text(
                 'Alarm für "$query" setzen',
-                style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
               ),
               const Spacer(),
-              Icon(Icons.chevron_right, size: 16, color: Colors.grey[400]),
+              const Icon(Icons.chevron_right, size: 16, color: AppColors.textTertiary),
             ],
           ),
         ),
@@ -194,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             '${appState.searchResults.length} Ergebnisse',
             style: const TextStyle(
-              color: Color(0xFF9CA3AF),
+              color: AppColors.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
               letterSpacing: -0.1,
@@ -207,17 +204,17 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0F2F7),
+                  color: AppColors.surfaceAlt,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.close_rounded, size: 11, color: Colors.grey[600]),
+                    const Icon(Icons.close_rounded, size: 11, color: AppColors.textSecondary),
                     const SizedBox(width: 3),
-                    Text('Filter zurücksetzen',
+                    const Text('Filter zurücksetzen',
                         style: TextStyle(
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w600)),
                   ],
@@ -236,12 +233,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
             const SizedBox(height: 16),
             Text(
               appState.error!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
+              style: const TextStyle(color: AppColors.danger),
             ),
           ],
         ),
@@ -249,21 +246,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (appState.searchQuery.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+      return LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
               Container(
                 width: 72,
                 height: 72,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFEAF4EF),
+                  color: AppColors.primarySoft,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.search_rounded,
-                    size: 34, color: Color(0xFF1B8A5A)),
+                    size: 34, color: AppColors.primary),
               ),
               const SizedBox(height: 20),
               const Text(
@@ -272,17 +274,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.5,
-                  color: Color(0xFF111827),
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'Such nach Lebensmitteln und vergleiche die Preise aller Supermärkte auf einen Blick.',
                 style: TextStyle(
-                    color: Colors.grey[500], fontSize: 14, height: 1.6),
+                    color: AppColors.textSecondary, fontSize: 14, height: 1.6),
                 textAlign: TextAlign.center,
               ),
-            ],
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       );
@@ -291,7 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (appState.isSearching) {
       return const Center(
         child: CircularProgressIndicator(
-          color: Color(0xFF1B8A5A),
+          color: AppColors.primary,
           strokeWidth: 2,
         ),
       );
@@ -308,21 +313,23 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: 72,
                 height: 72,
-                decoration: BoxDecoration(
-                    color: Colors.grey[100], shape: BoxShape.circle),
-                child: Icon(Icons.search_off_rounded,
-                    size: 34, color: Colors.grey[400]),
+                decoration: const BoxDecoration(
+                    color: AppColors.surfaceAlt, shape: BoxShape.circle),
+                child: const Icon(Icons.search_off_rounded,
+                    size: 34, color: AppColors.textTertiary),
               ),
               const SizedBox(height: 20),
               const Text('Keine Ergebnisse',
                   style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: -0.4)),
+                      letterSpacing: -0.4,
+                      color: AppColors.textPrimary)),
               const SizedBox(height: 8),
               Text(
                 'Für "${appState.searchQuery}" wurden keine Produkte gefunden.',
-                style: TextStyle(color: Colors.grey[500], fontSize: 14, height: 1.5),
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 14, height: 1.5),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -346,29 +353,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _KeywordAlertDialog extends StatefulWidget {
+class _KeywordAlertDialog extends StatelessWidget {
   final String keyword;
   const _KeywordAlertDialog({required this.keyword});
-
-  @override
-  State<_KeywordAlertDialog> createState() => _KeywordAlertDialogState();
-}
-
-class _KeywordAlertDialogState extends State<_KeywordAlertDialog> {
-  AlertType _selectedType = AlertType.promotion;
-  late final TextEditingController _priceController;
-
-  @override
-  void initState() {
-    super.initState();
-    _priceController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _priceController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -383,67 +370,29 @@ class _KeywordAlertDialogState extends State<_KeywordAlertDialog> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF1B8A5A).withValues(alpha: 0.1),
+              color: AppColors.primarySoft,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.search, size: 14, color: Color(0xFF1B8A5A)),
+                const Icon(Icons.search, size: 14, color: AppColors.primary),
                 const SizedBox(width: 6),
                 Text(
-                  '"${widget.keyword}"',
+                  '"$keyword"',
                   style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1B8A5A),
+                      color: AppColors.primary,
                       fontSize: 13),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 6),
-          Text('Alarm für alle Produkte die diesen Begriff enthalten.',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-          const SizedBox(height: 16),
-          RadioListTile<AlertType>(
-            value: AlertType.promotion,
-            groupValue: _selectedType,
-            contentPadding: EdgeInsets.zero,
-            activeColor: const Color(0xFF1B8A5A),
-            title: const Text('Im Angebot',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('Wenn ein passendes Produkt im Angebot ist'),
-            onChanged: (v) => setState(() => _selectedType = v!),
+          const Text(
+            'Du wirst benachrichtigt wenn ein passendes Produkt im Angebot ist.',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
-          RadioListTile<AlertType>(
-            value: AlertType.targetPrice,
-            groupValue: _selectedType,
-            contentPadding: EdgeInsets.zero,
-            activeColor: const Color(0xFF1B8A5A),
-            title: const Text('Zielpreis',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: const Text('Wenn ein Produkt unter diesen Preis fällt'),
-            onChanged: (v) => setState(() => _selectedType = v!),
-          ),
-          if (_selectedType == AlertType.targetPrice) ...[
-            const SizedBox(height: 8),
-            TextField(
-              controller: _priceController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                labelText: 'Zielpreis',
-                prefixText: '€ ',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF1B8A5A), width: 1.5),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-            ),
-          ],
         ],
       ),
       actions: [
@@ -458,20 +407,13 @@ class _KeywordAlertDialogState extends State<_KeywordAlertDialog> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           onPressed: () async {
-            double? targetPrice;
-            if (_selectedType == AlertType.targetPrice) {
-              targetPrice = double.tryParse(
-                  _priceController.text.replaceAll(',', '.'));
-              if (targetPrice == null) return;
-            }
             final appState = context.read<AppState>();
             final messenger = ScaffoldMessenger.of(context);
             Navigator.pop(context);
             try {
               await appState.setKeywordAlert(
-                keyword: widget.keyword,
-                alertType: _selectedType,
-                targetPrice: targetPrice,
+                keyword: keyword,
+                alertType: AlertType.promotion,
               );
               messenger
                 ..clearSnackBars()

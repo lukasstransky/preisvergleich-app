@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/product.dart';
 import '../models/price_alert.dart';
 import '../providers/app_state.dart';
+import '../theme/app_colors.dart';
 import 'price_history_chart.dart';
 
 class ProductCard extends StatelessWidget {
@@ -12,21 +13,11 @@ class ProductCard extends StatelessWidget {
 
   const ProductCard({super.key, required this.product});
 
-  static const _primary = Color(0xFF1B8A5A);
+  static const _primary = AppColors.primary;
 
-  Color _supermarketColor(String s) {
-    switch (s.toLowerCase()) {
-      case 'spar':   return const Color(0xFF007A3D);
-      case 'billa':  return const Color(0xFFFFCC00);
-      case 'hofer':  return const Color(0xFF004A99);
-      case 'penny':  return const Color(0xFFCC1212);
-      case 'lidl':   return const Color(0xFF0050AA);
-      case 'mpreis': return const Color(0xFFE30613);
-      default:       return Colors.grey;
-    }
-  }
+  Color _supermarketColor(String s) => AppColors.supermarket(s);
 
-  bool _lightText(String s) => s.toLowerCase() != 'billa';
+  bool _lightText(String s) => !AppColors.supermarketNeedsDarkText(s);
 
   @override
   Widget build(BuildContext context) {
@@ -38,16 +29,9 @@ class ProductCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x0D000000),
-              blurRadius: 12,
-              spreadRadius: 0,
-              offset: Offset(0, 3),
-            ),
-          ],
+          border: Border.all(color: AppColors.border),
         ),
         child: Material(
           color: Colors.transparent,
@@ -92,24 +76,24 @@ class ProductCard extends StatelessWidget {
                       imageUrl: product.imageUrl!,
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Container(
-                        color: const Color(0xFFF4F6FA),
+                        color: AppColors.surfaceAlt,
                         child: const Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 1.5,
-                            color: Color(0xFFCDD0D8),
+                            color: AppColors.textTertiary,
                           ),
                         ),
                       ),
                       errorWidget: (_, __, ___) => Container(
-                        color: const Color(0xFFF4F6FA),
+                        color: AppColors.surfaceAlt,
                         child: const Icon(Icons.shopping_basket_outlined,
-                            color: Color(0xFFCDD0D8), size: 28),
+                            color: AppColors.textTertiary, size: 28),
                       ),
                     )
                   : Container(
-                      color: const Color(0xFFF4F6FA),
+                      color: AppColors.surfaceAlt,
                       child: const Icon(Icons.shopping_basket_outlined,
-                          color: Color(0xFFCDD0D8), size: 28),
+                          color: AppColors.textTertiary, size: 28),
                     ),
             ),
           ),
@@ -120,7 +104,7 @@ class ProductCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                 decoration: const BoxDecoration(
-                  color: Color(0xFFE53935),
+                  color: AppColors.danger,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(10),
                     bottomRight: Radius.circular(8),
@@ -160,7 +144,7 @@ class ProductCard extends StatelessWidget {
                 width: 20,
                 height: 20,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFE53935),
+                  color: AppColors.danger,
                   borderRadius: BorderRadius.only(
                     bottomRight: Radius.circular(10),
                     topLeft: Radius.circular(8),
@@ -187,7 +171,7 @@ class ProductCard extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
-            color: Color(0xFF111827),
+            color: AppColors.textPrimary,
             height: 1.3,
             letterSpacing: -0.2,
           ),
@@ -220,13 +204,13 @@ class ProductCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3E0),
+                  color: AppColors.promoSoft,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   product.promotionText!,
                   style: const TextStyle(
-                    color: Color(0xFFE65100),
+                    color: AppColors.promo,
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                   ),
@@ -245,8 +229,8 @@ class ProductCard extends StatelessWidget {
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
                 color: product.inPromotion
-                    ? const Color(0xFFE53935)
-                    : const Color(0xFF111827),
+                    ? AppColors.danger
+                    : AppColors.textPrimary,
                 letterSpacing: -0.5,
                 height: 1,
               ),
@@ -259,7 +243,7 @@ class ProductCard extends StatelessWidget {
                   product.formattedOriginalPrice!,
                   style: TextStyle(
                     decoration: TextDecoration.lineThrough,
-                    color: Colors.grey[400],
+                    color: AppColors.textTertiary,
                     fontSize: 12,
                     height: 1,
                   ),
@@ -274,7 +258,7 @@ class ProductCard extends StatelessWidget {
             child: Text(
               product.formattedUnitPrice!,
               style: TextStyle(
-                color: Colors.grey[500],
+                color: AppColors.textSecondary,
                 fontSize: 11,
                 letterSpacing: -0.1,
               ),
@@ -294,7 +278,7 @@ class ProductCard extends StatelessWidget {
         child: Icon(
           isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           size: 18,
-          color: isFav ? const Color(0xFFE53935) : Colors.grey[400],
+          color: isFav ? AppColors.danger : AppColors.textTertiary,
         ),
       ),
     );
@@ -329,7 +313,7 @@ class ProductCard extends StatelessWidget {
                   color: _primary,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.add, color: Colors.white, size: 20),
+                child: const Icon(Icons.add, color: AppColors.onPrimary, size: 20),
               ),
             ),
           ),
@@ -360,8 +344,8 @@ class ProductCard extends StatelessWidget {
                       ? Icons.delete_outline_rounded
                       : Icons.remove_rounded,
                   color: quantity == 1
-                      ? const Color(0xFFE53935)
-                      : Colors.grey[700]!,
+                      ? AppColors.danger
+                      : AppColors.textSecondary,
                   onTap: () => appState.decrementQuantity(product.id),
                 ),
                 Padding(
@@ -426,19 +410,9 @@ class _ProductDetailSheet extends StatelessWidget {
 
   const _ProductDetailSheet({required this.product});
 
-  Color _supermarketColor(String s) {
-    switch (s.toLowerCase()) {
-      case 'spar':   return const Color(0xFF007A3D);
-      case 'billa':  return const Color(0xFFFFCC00);
-      case 'hofer':  return const Color(0xFF004A99);
-      case 'penny':  return const Color(0xFFCC1212);
-      case 'lidl':   return const Color(0xFF0050AA);
-      case 'mpreis': return const Color(0xFFE30613);
-      default:       return Colors.grey;
-    }
-  }
+  Color _supermarketColor(String s) => AppColors.supermarket(s);
 
-  bool _lightText(String s) => s.toLowerCase() != 'billa';
+  bool _lightText(String s) => !AppColors.supermarketNeedsDarkText(s);
 
   @override
   Widget build(BuildContext context) {
@@ -447,7 +421,7 @@ class _ProductDetailSheet extends StatelessWidget {
         final alert = appState.getAlert(product.id);
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: EdgeInsets.only(
@@ -466,7 +440,7 @@ class _ProductDetailSheet extends StatelessWidget {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: AppColors.surfaceHigh,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -504,7 +478,7 @@ class _ProductDetailSheet extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(product.brand!,
                               style: TextStyle(
-                                  color: Colors.grey[500], fontSize: 13)),
+                                  color: AppColors.textSecondary, fontSize: 13)),
                         ],
                       ],
                     ),
@@ -540,8 +514,8 @@ class _ProductDetailSheet extends StatelessWidget {
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
                       color: product.inPromotion
-                          ? const Color(0xFFE53935)
-                          : const Color(0xFF111827),
+                          ? AppColors.danger
+                          : AppColors.textPrimary,
                       letterSpacing: -1,
                       height: 1,
                     ),
@@ -554,7 +528,7 @@ class _ProductDetailSheet extends StatelessWidget {
                         product.formattedOriginalPrice!,
                         style: TextStyle(
                           decoration: TextDecoration.lineThrough,
-                          color: Colors.grey[400],
+                          color: AppColors.textTertiary,
                           fontSize: 15,
                         ),
                       ),
@@ -565,7 +539,7 @@ class _ProductDetailSheet extends StatelessWidget {
                     Text(
                       product.formattedUnitPrice!,
                       style: TextStyle(
-                          color: Colors.grey[500],
+                          color: AppColors.textSecondary,
                           fontSize: 13),
                     ),
                 ],
@@ -574,7 +548,7 @@ class _ProductDetailSheet extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   product.category!,
-                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                  style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
                 ),
               ],
               if (product.formattedOfferPeriod != null) ...[
@@ -582,12 +556,12 @@ class _ProductDetailSheet extends StatelessWidget {
                 Row(
                   children: [
                     Icon(Icons.calendar_today_rounded,
-                        size: 13, color: Colors.grey[400]),
+                        size: 13, color: AppColors.textTertiary),
                     const SizedBox(width: 5),
                     Text(
                       'Angebot: ${product.formattedOfferPeriod!}',
                       style: TextStyle(
-                          color: Colors.grey[500],
+                          color: AppColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500),
                     ),
@@ -605,8 +579,8 @@ class _ProductDetailSheet extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.grey[700],
-                      side: BorderSide(color: Colors.grey[300]!),
+                      foregroundColor: AppColors.textSecondary,
+                      side: BorderSide(color: AppColors.border),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -656,10 +630,10 @@ class _ActiveAlertRow extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B8A5A).withValues(alpha: 0.06),
+        color: AppColors.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: const Color(0xFF1B8A5A).withValues(alpha: 0.2)),
+            color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -667,11 +641,11 @@ class _ActiveAlertRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: const Color(0xFF1B8A5A).withValues(alpha: 0.12),
+              color: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.notifications_active_rounded,
-                color: Color(0xFF1B8A5A), size: 18),
+                color: AppColors.primary, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -682,16 +656,16 @@ class _ActiveAlertRow extends StatelessWidget {
                     style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: Color(0xFF111827))),
+                        color: AppColors.textPrimary)),
                 Text(alert.alertDescription,
                     style: TextStyle(
-                        color: Colors.grey[500], fontSize: 12)),
+                        color: AppColors.textSecondary, fontSize: 12)),
               ],
             ),
           ),
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFFE53935),
+              foregroundColor: AppColors.danger,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -731,8 +705,8 @@ class _SetAlertButton extends StatelessWidget {
         label: const Text('Preisalarm setzen',
             style: TextStyle(fontWeight: FontWeight.w600)),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF1B8A5A),
-          side: const BorderSide(color: Color(0xFF1B8A5A), width: 1.5),
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.primary, width: 1.5),
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14)),
@@ -786,7 +760,7 @@ class _AlertDialogState extends State<_AlertDialog> {
         children: [
           Text(widget.product.name,
               style: TextStyle(
-                  fontSize: 13, color: Colors.grey[500], height: 1.3),
+                  fontSize: 13, color: AppColors.textSecondary, height: 1.3),
               maxLines: 2,
               overflow: TextOverflow.ellipsis),
           const SizedBox(height: 16),
@@ -824,7 +798,7 @@ class _AlertDialogState extends State<_AlertDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text('Abbrechen',
-              style: TextStyle(color: Colors.grey[600])),
+              style: TextStyle(color: AppColors.textSecondary)),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -890,12 +864,12 @@ class _AlertOption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF1B8A5A).withValues(alpha: 0.06)
-              : const Color(0xFFF4F6FA),
+              ? AppColors.primary.withValues(alpha: 0.06)
+              : AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected
-                ? const Color(0xFF1B8A5A).withValues(alpha: 0.35)
+                ? AppColors.primary.withValues(alpha: 0.35)
                 : Colors.transparent,
             width: 1.5,
           ),
@@ -911,12 +885,12 @@ class _AlertOption extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                           color: selected
-                              ? const Color(0xFF1B8A5A)
-                              : const Color(0xFF111827))),
+                              ? AppColors.primary
+                              : AppColors.textPrimary)),
                   const SizedBox(height: 2),
                   Text(subtitle,
                       style: TextStyle(
-                          fontSize: 12, color: Colors.grey[500])),
+                          fontSize: 12, color: AppColors.textSecondary)),
                 ],
               ),
             ),
@@ -924,7 +898,7 @@ class _AlertOption extends StatelessWidget {
               value: value,
               groupValue: group,
               onChanged: onChanged,
-              activeColor: const Color(0xFF1B8A5A),
+              activeColor: AppColors.primary,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ],

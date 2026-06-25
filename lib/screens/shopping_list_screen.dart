@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/app_state.dart';
 import '../models/shopping_list_item.dart';
 import 'shopping_lists_screen.dart';
+import '../theme/app_colors.dart';
 
 class ShoppingListScreen extends StatefulWidget {
   const ShoppingListScreen({super.key});
@@ -25,17 +26,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     });
   }
 
-  Color _getSupermarketColor(String supermarket) {
-    switch (supermarket.toLowerCase()) {
-      case 'spar':   return const Color(0xFF006633);
-      case 'billa':  return const Color(0xFFFFCC00);
-      case 'hofer':  return const Color(0xFF004A99);
-      case 'penny':  return const Color(0xFFCD1719);
-      case 'lidl':   return const Color(0xFF0050AA);
-      case 'mpreis': return const Color(0xFFE30613);
-      default:       return Colors.grey;
-    }
-  }
+  Color _getSupermarketColor(String supermarket) => AppColors.supermarket(supermarket);
 
   String _displayName(String supermarket) {
     switch (supermarket.toLowerCase()) {
@@ -96,13 +87,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey[400]),
+          Icon(Icons.shopping_cart_outlined, size: 80, color: AppColors.textTertiary),
           const SizedBox(height: 16),
           Text('Einkaufsliste ist leer',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600])),
+              style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
           const SizedBox(height: 8),
           Text('Füge Produkte über die Suche hinzu',
-              style: TextStyle(color: Colors.grey[500])),
+              style: TextStyle(color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -156,7 +147,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(width: 8),
-              Text('($count)', style: TextStyle(color: Colors.grey[600])),
+              Text('($count)', style: TextStyle(color: AppColors.textSecondary)),
             ],
           ),
           Text('€${subtotal.toStringAsFixed(2)}',
@@ -172,7 +163,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       key: Key(item.product.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: Colors.red,
+        color: AppColors.danger,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
         child: const Icon(Icons.delete, color: Colors.white),
@@ -206,18 +197,18 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                   height: 26,
                   decoration: BoxDecoration(
                     color: isChecked
-                        ? const Color(0xFF1B8A5A)
+                        ? AppColors.primary
                         : Colors.transparent,
                     border: Border.all(
                       color: isChecked
-                          ? const Color(0xFF1B8A5A)
-                          : Colors.grey[400]!,
+                          ? AppColors.primary
+                          : AppColors.border,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: isChecked
-                      ? const Icon(Icons.check, color: Colors.white, size: 16)
+                      ? const Icon(Icons.check, color: AppColors.onPrimary, size: 16)
                       : null,
                 ),
                 const SizedBox(width: 10),
@@ -232,12 +223,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                             imageUrl: item.product.imageUrl!,
                             fit: BoxFit.cover,
                             errorWidget: (_, __, ___) => Container(
-                              color: Colors.grey[200],
+                              color: AppColors.surfaceAlt,
                               child: const Icon(Icons.shopping_basket, size: 22),
                             ),
                           )
                         : Container(
-                            color: Colors.grey[200],
+                            color: AppColors.surfaceAlt,
                             child: const Icon(Icons.shopping_basket, size: 22),
                           ),
                   ),
@@ -260,7 +251,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                       if (item.product.brand != null)
                         Text(
                           item.product.brand!,
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
                         ),
                     ],
                   ),
@@ -280,7 +271,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                         if (item.quantity > 1)
                           Text(
                             '${item.quantity} × €${item.product.price.toStringAsFixed(2)}',
-                            style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
                           ),
                       ],
                     ),
@@ -299,7 +290,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   Widget _buildQuantityControls(ShoppingListItem item, AppState appState) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -312,7 +303,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               child: Icon(
                 item.quantity == 1 ? Icons.delete_outline : Icons.remove,
                 size: 18,
-                color: item.quantity == 1 ? Colors.red : Colors.grey[700],
+                color: item.quantity == 1 ? AppColors.danger : AppColors.textSecondary,
               ),
             ),
           ),
@@ -325,7 +316,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             onTap: () => appState.incrementQuantity(item.product.id),
             child: Container(
               padding: const EdgeInsets.all(4),
-              child: Icon(Icons.add, size: 18, color: Colors.grey[700]),
+              child: Icon(Icons.add, size: 18, color: AppColors.textSecondary),
             ),
           ),
         ],
@@ -339,10 +330,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withValues(alpha: 0.35),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -362,8 +353,8 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                       : '$checkedCount von $totalCount erledigt',
                   style: TextStyle(
                     color: checkedCount > 0
-                        ? const Color(0xFF1B8A5A)
-                        : Colors.grey[600],
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
                     fontSize: 13,
                     fontWeight: checkedCount > 0 ? FontWeight.w600 : FontWeight.normal,
                   ),
@@ -411,7 +402,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               appState.clearShoppingList();
               Navigator.pop(context);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
             child: const Text('Leeren'),
           ),
         ],

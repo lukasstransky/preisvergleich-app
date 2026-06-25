@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
+import '../theme/app_colors.dart';
 
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key});
@@ -66,24 +67,23 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surfaceAlt,
               borderRadius: BorderRadius.circular(50),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+              border: Border.all(color: AppColors.border),
             ),
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
               textInputAction: TextInputAction.search,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+              ),
+              cursorColor: AppColors.primary,
               decoration: InputDecoration(
                 hintText: 'Lebensmittel suchen...',
-                hintStyle: TextStyle(
-                  color: Colors.grey[400],
+                hintStyle: const TextStyle(
+                  color: AppColors.textTertiary,
                   fontWeight: FontWeight.w400,
                   fontSize: 15,
                 ),
@@ -94,8 +94,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                     child: Icon(
                       Icons.search_rounded,
                       color: hasText
-                          ? const Color(0xFF1B8A5A)
-                          : Colors.grey[400],
+                          ? AppColors.primary
+                          : AppColors.textTertiary,
                       size: 22,
                     ),
                   ),
@@ -109,19 +109,19 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                           child: Container(
                             width: 20,
                             height: 20,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
+                            decoration: const BoxDecoration(
+                              color: AppColors.surfaceHigh,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.close,
-                                size: 13, color: Colors.white),
+                                size: 13, color: AppColors.textSecondary),
                           ),
                         ),
                       )
                     : null,
                 suffixIconConstraints: const BoxConstraints(minWidth: 48),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AppColors.surfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(50),
                   borderSide: BorderSide.none,
@@ -157,15 +157,9 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +172,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 Text(
                   'Zuletzt gesucht',
                   style: TextStyle(
-                    color: Colors.grey[500],
+                    color: AppColors.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -193,7 +187,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                     minimumSize: Size.zero,
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    foregroundColor: Colors.grey[500],
+                    foregroundColor: AppColors.textSecondary,
                   ),
                   child: const Text('Alle löschen',
                       style: TextStyle(fontSize: 12)),
@@ -209,20 +203,21 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                       horizontal: 16, vertical: 11),
                   child: Row(
                     children: [
-                      Icon(Icons.history_rounded,
-                          size: 17, color: Colors.grey[400]),
+                      const Icon(Icons.history_rounded,
+                          size: 17, color: AppColors.textTertiary),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(query,
                             style: const TextStyle(
                                 fontSize: 14,
-                                fontWeight: FontWeight.w500)),
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary)),
                       ),
                       GestureDetector(
                         onTap: () =>
                             appState.removeFromSearchHistory(query),
-                        child:
-                            Icon(Icons.close, size: 15, color: Colors.grey[400]),
+                        child: const Icon(Icons.close,
+                            size: 15, color: AppColors.textTertiary),
                       ),
                     ],
                   ),

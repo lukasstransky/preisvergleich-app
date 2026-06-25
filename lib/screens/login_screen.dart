@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../services/auth_service.dart';
+import '../theme/app_colors.dart';
 import 'main_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Anmeldung fehlgeschlagen: $e'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.danger,
         ));
       }
     } finally {
@@ -41,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1B8A5A),
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -68,28 +69,28 @@ class _LoginScreenState extends State<LoginScreen> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.15),
+            color: AppColors.primarySoft,
             borderRadius: BorderRadius.circular(24),
           ),
           child: const Icon(Icons.shopping_basket_rounded,
-              size: 42, color: Colors.white),
+              size: 42, color: AppColors.primary),
         ),
         const SizedBox(height: 24),
         const Text(
           'Preisvergleich',
           style: TextStyle(
-            color: Colors.white,
+            color: AppColors.textPrimary,
             fontSize: 30,
             fontWeight: FontWeight.w800,
             letterSpacing: -1,
           ),
         ),
         const SizedBox(height: 10),
-        Text(
+        const Text(
           'Finde die besten Preise\nbei allen Supermärkten.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: AppColors.textSecondary,
             fontSize: 16,
             height: 1.5,
           ),

@@ -16,21 +16,21 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  static const _screens = [
-    HomeScreen(),
-    FavoritesScreen(),
-    PriceAlertsScreen(),
-    ShoppingListScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
 
+    final screens = [
+      const HomeScreen(),
+      const FavoritesScreen(),
+      PriceAlertsScreen(onGoToSearch: () => setState(() => _currentIndex = 0)),
+      const ShoppingListScreen(),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,

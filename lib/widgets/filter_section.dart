@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state.dart';
 import '../services/algolia_service.dart';
+import '../theme/app_colors.dart';
 
 class FilterSection extends StatelessWidget {
   const FilterSection({super.key});
@@ -14,7 +15,7 @@ class FilterSection extends StatelessWidget {
     final hasCategories = appState.availableCategories.isNotEmpty;
 
     return ColoredBox(
-      color: Colors.white,
+      color: AppColors.surface,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,13 +42,13 @@ class FilterSection extends StatelessWidget {
                   width: 1,
                   height: 16,
                   margin: const EdgeInsets.symmetric(horizontal: 10),
-                  color: const Color(0xFFDDE0E8),
+                  color: AppColors.border,
                 ),
                 _ActionChip(
                   label: 'Angebote',
                   icon: Icons.local_offer_rounded,
                   active: appState.onlyPromotions,
-                  activeColor: const Color(0xFFE53935),
+                  activeColor: AppColors.danger,
                   onTap: appState.toggleOnlyPromotions,
                 ),
               ],
@@ -110,7 +111,7 @@ class _SortChip extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _primary = Color(0xFF1B8A5A);
+  static const _primary = AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +121,7 @@ class _SortChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? _primary : const Color(0xFFF0F2F7),
+          color: selected ? _primary : AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -128,14 +129,14 @@ class _SortChip extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 13,
-                color: selected ? Colors.white : Colors.grey[600]),
+                color: selected ? AppColors.onPrimary : AppColors.textSecondary),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: selected ? Colors.white : Colors.grey[700],
+                color: selected ? AppColors.onPrimary : AppColors.textSecondary,
                 letterSpacing: -0.1,
               ),
             ),
@@ -169,7 +170,7 @@ class _ActionChip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? activeColor : const Color(0xFFF0F2F7),
+          color: active ? activeColor : AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -177,17 +178,237 @@ class _ActionChip extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 13,
-                color: active ? Colors.white : Colors.grey[600]),
+                color: active ? AppColors.onPrimary : AppColors.textSecondary),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: active ? Colors.white : Colors.grey[700],
+                color: active ? AppColors.onPrimary : AppColors.textSecondary,
                 letterSpacing: -0.1,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryDropdown extends StatelessWidget {
+  final List<String> categories;
+  final Map<String, int> categoryCounts;
+  final String? selectedCategory;
+  final ValueChanged<String?> onChanged;
+
+  const _CategoryDropdown({
+    required this.categories,
+    required this.categoryCounts,
+    required this.selectedCategory,
+    required this.onChanged,
+  });
+
+  static const _primary = AppColors.primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSelection = selectedCategory != null;
+
+    return GestureDetector(
+      onTap: () => _openSheet(context),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: hasSelection ? _primary : AppColors.surfaceAlt,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.category_rounded,
+              size: 13,
+              color: hasSelection ? AppColors.onPrimary : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 5),
+            Text(
+              hasSelection
+                  ? '$selectedCategory · ${categoryCounts[selectedCategory] ?? 0}'
+                  : 'Kategorie',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: hasSelection ? AppColors.onPrimary : AppColors.textSecondary,
+                letterSpacing: -0.1,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.expand_more_rounded,
+              size: 14,
+              color: hasSelection ? AppColors.onPrimary : AppColors.textSecondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _CategorySheet(
+        categories: categories,
+        categoryCounts: categoryCounts,
+        selectedCategory: selectedCategory,
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _CategorySheet extends StatelessWidget {
+  final List<String> categories;
+  final Map<String, int> categoryCounts;
+  final String? selectedCategory;
+  final ValueChanged<String?> onChanged;
+
+  const _CategorySheet({
+    required this.categories,
+    required this.categoryCounts,
+    required this.selectedCategory,
+    required this.onChanged,
+  });
+
+  static const _primary = AppColors.primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: const EdgeInsets.only(top: 12, bottom: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceHigh,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                const Text(
+                  'Kategorie',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const Spacer(),
+                if (selectedCategory != null)
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.textSecondary,
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () {
+                      onChanged(null);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Zurücksetzen',
+                        style: TextStyle(fontSize: 13)),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
+            ),
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                _SheetOption(
+                  label: 'Alle Kategorien',
+                  count: null,
+                  selected: selectedCategory == null,
+                  onTap: () {
+                    onChanged(null);
+                    Navigator.pop(context);
+                  },
+                ),
+                ...categories.map((cat) => _SheetOption(
+                      label: cat,
+                      count: categoryCounts[cat] ?? 0,
+                      selected: selectedCategory == cat,
+                      onTap: () {
+                        onChanged(selectedCategory == cat ? null : cat);
+                        Navigator.pop(context);
+                      },
+                    )),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SheetOption extends StatelessWidget {
+  final String label;
+  final int? count;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SheetOption({
+    required this.label,
+    required this.count,
+    required this.selected,
+    required this.onTap,
+  });
+
+  static const _primary = AppColors.primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                count != null ? '$label · $count' : label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight:
+                      selected ? FontWeight.w600 : FontWeight.w400,
+                  color: selected ? _primary : AppColors.textPrimary,
+                ),
+              ),
+            ),
+            if (selected)
+              const Icon(Icons.check_rounded, size: 18, color: _primary),
           ],
         ),
       ),
@@ -210,7 +431,7 @@ class _CategoryChip extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _primary = Color(0xFF1B8A5A);
+  static const _primary = AppColors.primary;
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +445,7 @@ class _CategoryChip extends StatelessWidget {
               ? _primary
               : dominant
                   ? _primary.withValues(alpha: 0.08)
-                  : const Color(0xFFF0F2F7),
+                  : AppColors.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
           border: dominant && !selected
               ? Border.all(
@@ -245,10 +466,10 @@ class _CategoryChip extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: selected
-                    ? Colors.white
+                    ? AppColors.onPrimary
                     : dominant
                         ? _primary
-                        : Colors.grey[700],
+                        : AppColors.textSecondary,
                 letterSpacing: -0.1,
               ),
             ),
