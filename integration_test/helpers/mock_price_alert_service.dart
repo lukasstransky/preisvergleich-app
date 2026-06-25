@@ -35,6 +35,7 @@ class MockPriceAlertService implements PriceAlertServiceBase {
     required String keyword,
     required AlertType alertType,
     double? targetPrice,
+    String? category,
   }) async {
     _alerts.add(PriceAlert(
       id: 'mock-kw-${DateTime.now().millisecondsSinceEpoch}',
