@@ -15,7 +15,7 @@ class FavoritesScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Consumer<AppState>(
-        builder: (_, appState, __) {
+        builder: (_, appState, _) {
           final favorites = appState.favorites;
           if (favorites.isEmpty) {
             return Center(

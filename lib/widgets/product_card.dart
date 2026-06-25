@@ -75,7 +75,7 @@ class ProductCard extends StatelessWidget {
                   ? CachedNetworkImage(
                       imageUrl: product.imageUrl!,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         color: AppColors.surfaceAlt,
                         child: const Center(
                           child: CircularProgressIndicator(
@@ -84,7 +84,7 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         color: AppColors.surfaceAlt,
                         child: const Icon(Icons.shopping_basket_outlined,
                             color: AppColors.textTertiary, size: 28),
@@ -417,7 +417,7 @@ class _ProductDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppState>(
-      builder: (_, appState, __) {
+      builder: (_, appState, _) {
         final alert = appState.getAlert(product.id);
         return Container(
           decoration: const BoxDecoration(
@@ -894,12 +894,28 @@ class _AlertOption extends StatelessWidget {
                 ],
               ),
             ),
-            Radio<AlertType>(
-              value: value,
-              groupValue: group,
-              onChanged: onChanged,
-              activeColor: AppColors.primary,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? AppColors.primary : AppColors.textTertiary,
+                  width: 2,
+                ),
+              ),
+              child: selected
+                  ? Center(
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  : null,
             ),
           ],
         ),

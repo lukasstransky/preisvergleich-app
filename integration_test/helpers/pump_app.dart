@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preisvergleich_app/providers/app_state.dart';
-import 'package:preisvergleich_app/screens/home_screen.dart';
+import 'package:preisvergleich_app/screens/main_screen.dart';
 import 'package:preisvergleich_app/services/algolia_service.dart';
 import 'package:preisvergleich_app/services/price_alert_service.dart';
 import 'package:preisvergleich_app/widgets/search_bar_widget.dart';
@@ -66,7 +66,7 @@ class _TestApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const HomeScreen(),
+      home: const MainScreen(),
     );
   }
 }

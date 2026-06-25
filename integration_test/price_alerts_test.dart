@@ -10,7 +10,7 @@ void main() {
     testWidgets('price alerts screen is empty initially', (tester) async {
       await pumpTestApp(tester);
 
-      await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+      await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(PriceAlertsScreen), findsOneWidget);
@@ -24,7 +24,7 @@ void main() {
             MockPriceAlertService(initialAlerts: [testProductAlert]),
       );
 
-      await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+      await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(PriceAlertsScreen), findsOneWidget);
@@ -81,7 +81,7 @@ void main() {
       await tester.tapAt(const Offset(200, 80));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+      await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(PriceAlertsScreen), findsOneWidget);
@@ -117,7 +117,7 @@ void main() {
             MockPriceAlertService(initialAlerts: [testProductAlert]),
       );
 
-      await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+      await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.text('Vollmilch 1L'), findsOneWidget);
@@ -136,7 +136,7 @@ void main() {
             MockPriceAlertService(initialAlerts: [testKeywordAlert]),
       );
 
-      await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+      await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(PriceAlertsScreen), findsOneWidget);

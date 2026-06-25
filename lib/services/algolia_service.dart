@@ -1,4 +1,5 @@
 import 'package:algoliasearch/algoliasearch.dart';
+import 'package:flutter/foundation.dart';
 import '../models/product.dart';
 
 enum SortOrder { relevance, unitPrice }
@@ -113,7 +114,7 @@ final filters = filterParts.isNotEmpty ? filterParts.join(' AND ') : null;
 
       return SearchResult(products: products, categoryCounts: categoryCounts);
     } catch (e) {
-      print('Algolia search error: $e');
+      debugPrint('Algolia search error: $e');
       rethrow;
     }
   }

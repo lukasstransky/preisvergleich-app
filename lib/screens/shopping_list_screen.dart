@@ -222,7 +222,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                         ? CachedNetworkImage(
                             imageUrl: item.product.imageUrl!,
                             fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) => Container(
+                            errorWidget: (_, _, _) => Container(
                               color: AppColors.surfaceAlt,
                               child: const Icon(Icons.shopping_basket, size: 22),
                             ),

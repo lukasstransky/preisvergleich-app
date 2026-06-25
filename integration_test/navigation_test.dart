@@ -8,24 +8,28 @@ import 'helpers/test_data.dart';
 
 void main() {
   group('Navigation', () {
-    testWidgets('home screen shows all three AppBar action icons', (tester) async {
+    testWidgets('home screen shows navigation bar icons', (tester) async {
       await pumpTestApp(tester);
 
-      expect(find.byIcon(Icons.favorite_border_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.notifications_none_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.shopping_cart_outlined), findsOneWidget);
+      // Icons live in the bottom NavigationBar — findsWidgets because
+      // NavigationBar may keep both icon and selectedIcon in the tree.
+      expect(find.byIcon(Icons.favorite_border_rounded), findsWidgets);
+      expect(find.byIcon(Icons.notifications_none_rounded), findsWidgets);
+      expect(find.byIcon(Icons.shopping_cart_outlined), findsWidgets);
     });
 
     testWidgets('navigate to favorites screen and back', (tester) async {
       await pumpTestApp(tester);
 
-      await tester.tap(find.byIcon(Icons.favorite_border_rounded));
+      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(FavoritesScreen), findsOneWidget);
-      expect(find.text('Favoriten'), findsOneWidget);
+      // 'Favoriten' appears in both the NavigationBar label and the screen AppBar
+      expect(find.text('Favoriten'), findsWidgets);
 
-      await tester.pageBack();
+      // Go back via the Suche (home) nav tab.
+      await tester.tap(find.text('Suche'));
       await tester.pumpAndSettle();
 
       expect(find.text('Preisvergleich'), findsOneWidget);
@@ -34,13 +38,13 @@ void main() {
     testWidgets('navigate to price alerts screen and back', (tester) async {
       await pumpTestApp(tester);
 
-      await tester.tap(find.byIcon(Icons.notifications_none_rounded));
+      await tester.tap(find.byIcon(Icons.notifications_none_rounded).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(PriceAlertsScreen), findsOneWidget);
       expect(find.text('Preisalarme'), findsOneWidget);
 
-      await tester.pageBack();
+      await tester.tap(find.text('Suche'));
       await tester.pumpAndSettle();
 
       expect(find.text('Preisvergleich'), findsOneWidget);
@@ -49,12 +53,12 @@ void main() {
     testWidgets('navigate to shopping list screen and back', (tester) async {
       await pumpTestApp(tester);
 
-      await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
+      await tester.tap(find.byIcon(Icons.shopping_cart_outlined).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(ShoppingListScreen), findsOneWidget);
 
-      await tester.pageBack();
+      await tester.tap(find.text('Suche'));
       await tester.pumpAndSettle();
 
       expect(find.text('Preisvergleich'), findsOneWidget);
@@ -94,15 +98,15 @@ void main() {
       await performSearch(tester, 'Milch');
       expect(find.text('Vollmilch 1L'), findsOneWidget);
 
-      // Navigate to favorites via the AppBar IconButton (not a card icon)
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.favorite_border_rounded));
+      // Navigate to favorites via the NavigationBar.
+      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first);
       await tester.pumpAndSettle();
 
-      // Go back
-      await tester.tap(find.byTooltip('Back'));
+      // Go back to search via Suche tab.
+      await tester.tap(find.text('Suche'));
       await tester.pumpAndSettle();
 
-      // Results should still be visible
+      // Results should still be visible (IndexedStack preserves state).
       expect(find.text('Vollmilch 1L'), findsOneWidget);
     });
   });

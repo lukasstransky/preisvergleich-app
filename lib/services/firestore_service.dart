@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/price_history_entry.dart';
 import '../models/product.dart';
 
@@ -28,7 +29,7 @@ class FirestoreService {
         final products = snapshot.docs.map((doc) => Product.fromFirestore(doc)).toList();
         allProducts.addAll(products);
       } catch (e) {
-        print('Error fetching $collection: $e');
+        debugPrint('Error fetching $collection: $e');
       }
     }
 
@@ -45,7 +46,7 @@ class FirestoreService {
           final snapshot = await _firestore.collection(collection).get();
           products.addAll(snapshot.docs.map((doc) => Product.fromFirestore(doc)));
         } catch (e) {
-          print('Error fetching $collection: $e');
+          debugPrint('Error fetching $collection: $e');
         }
       }
     }

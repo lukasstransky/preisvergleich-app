@@ -36,7 +36,7 @@ void main() {
       await _pumpChart(
         tester,
         testProducts[0], // Vollmilch 1L, price: 1.29
-        (_, __) async => [
+        (_, _) async => [
           PriceHistoryEntry(price: 1.09, date: '2026-06-17'),
           PriceHistoryEntry(price: 1.19, date: '2026-06-18'),
         ],
@@ -52,7 +52,7 @@ void main() {
       await _pumpChart(
         tester,
         testProducts[0],
-        (_, __) async => [],
+        (_, _) async => [],
       );
       await tester.pumpAndSettle();
 
@@ -64,7 +64,7 @@ void main() {
       await _pumpChart(
         tester,
         testProducts[0],
-        (_, __) async {
+        (_, _) async {
           await Future.delayed(const Duration(milliseconds: 200));
           return [
             PriceHistoryEntry(price: 1.09, date: '2026-06-17'),
@@ -87,7 +87,7 @@ void main() {
       await _pumpChart(
         tester,
         testProducts[1], // Bio Vollmilch 1L (inPromotion: true, price: 1.59)
-        (_, __) async => [],
+        (_, _) async => [],
       );
       await tester.pumpAndSettle();
 

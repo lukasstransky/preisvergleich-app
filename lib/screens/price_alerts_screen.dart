@@ -196,8 +196,19 @@ class _AlertTile extends StatelessWidget {
                   height: 60,
                   child: CachedNetworkImage(
                     imageUrl: alert.imageUrl!,
+                    width: 60,
+                    height: 60,
                     fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => Container(
+                    placeholder: (_, _) => Container(
+                      color: AppColors.surfaceAlt,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (_, _, _) => Container(
                       color: AppColors.surfaceAlt,
                       child: const Icon(Icons.shopping_basket, color: AppColors.textTertiary),
                     ),

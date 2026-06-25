@@ -35,7 +35,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Navigate to shopping list
-      await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
+      await tester.tap(find.byIcon(Icons.shopping_cart_outlined).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(ShoppingListScreen), findsOneWidget);
@@ -49,7 +49,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.add).first);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
+      await tester.tap(find.byIcon(Icons.shopping_cart_outlined).first);
       await tester.pumpAndSettle();
 
       // Total should contain the price (dot separator — Dart's toStringAsFixed is locale-independent)
@@ -120,7 +120,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Navigate to shopping list
-      await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
+      await tester.tap(find.byIcon(Icons.shopping_cart_outlined).first);
       await tester.pumpAndSettle();
 
       expect(find.text('Apfelsaft 1L'), findsOneWidget);
@@ -131,7 +131,7 @@ void main() {
       await pumpTestApp(tester);
 
       // Navigate to shopping list screen
-      await tester.tap(find.byIcon(Icons.shopping_cart_outlined));
+      await tester.tap(find.byIcon(Icons.shopping_cart_outlined).first);
       await tester.pumpAndSettle();
 
       expect(find.byType(ShoppingListScreen), findsOneWidget);

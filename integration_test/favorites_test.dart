@@ -9,7 +9,7 @@ void main() {
     testWidgets('favorites screen is empty initially', (tester) async {
       await pumpTestApp(tester);
 
-      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first);
+      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first); // NavigationBar tab
       await tester.pumpAndSettle();
 
       expect(find.byType(FavoritesScreen), findsOneWidget);
@@ -50,7 +50,7 @@ void main() {
       await tester.pump();
 
       // Navigate to favorites via AppBar icon
-      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first);
+      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first); // NavigationBar tab
       await tester.pumpAndSettle();
 
       expect(find.byType(FavoritesScreen), findsOneWidget);
@@ -66,7 +66,7 @@ void main() {
       await tester.pump();
 
       // Navigate to favorites
-      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first);
+      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first); // NavigationBar tab
       await tester.pumpAndSettle();
       expect(find.text('Butter 250g'), findsOneWidget);
 
@@ -88,7 +88,7 @@ void main() {
       await tester.pump();
 
       // Navigate to favorites
-      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first);
+      await tester.tap(find.byIcon(Icons.favorite_border_rounded).first); // NavigationBar tab
       await tester.pumpAndSettle();
 
       expect(find.text('Apfelsaft 1L'), findsOneWidget);
