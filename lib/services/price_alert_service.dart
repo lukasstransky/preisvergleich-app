@@ -16,6 +16,7 @@ abstract class PriceAlertServiceBase {
     required String keyword,
     required AlertType alertType,
     double? targetPrice,
+    String? category,
   });
   Future<void> deleteAlert(String alertId);
 }
@@ -202,6 +203,7 @@ class PriceAlertService implements PriceAlertServiceBase {
     required String keyword,
     required AlertType alertType,
     double? targetPrice,
+    String? category,
   }) async {
     final token = await getDeviceToken();
 
@@ -216,6 +218,7 @@ class PriceAlertService implements PriceAlertServiceBase {
       createdAt: DateTime.now(),
       scope: AlertScope.keyword,
       keyword: keyword.toLowerCase(),
+      category: category,
     );
 
     await _firestore.collection('price_alerts').add(alert.toFirestore(token!));

@@ -330,25 +330,24 @@ class ProductCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 2),
           child: Container(
+            height: 34,
             decoration: BoxDecoration(
               color: c.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: c.primary.withValues(alpha: 0.2)),
             ),
-            child: Column(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 _QtyBtn(
                   icon: quantity == 1
                       ? Icons.delete_outline_rounded
                       : Icons.remove_rounded,
-                  color: quantity == 1
-                      ? c.danger
-                      : c.textSecondary,
+                  color: quantity == 1 ? c.danger : c.textSecondary,
                   onTap: () => appState.decrementQuantity(product.id),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     '$quantity',
                     style: TextStyle(

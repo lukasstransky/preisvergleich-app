@@ -16,6 +16,7 @@ class PriceAlert {
   final DateTime createdAt;
   final AlertScope scope;
   final String? keyword;
+  final String? category;
 
   const PriceAlert({
     required this.id,
@@ -29,13 +30,15 @@ class PriceAlert {
     required this.createdAt,
     this.scope = AlertScope.product,
     this.keyword,
+    this.category,
   });
 
   bool get isKeywordAlert => scope == AlertScope.keyword;
 
   String get alertDescription {
-    if (alertType == AlertType.promotion) return 'Bei Angebot';
-    return 'Unter €${targetPrice!.toStringAsFixed(2)}';
+    final cat = category != null ? ' · $category' : '';
+    if (alertType == AlertType.promotion) return 'Bei Angebot$cat';
+    return 'Unter €${targetPrice!.toStringAsFixed(2)}$cat';
   }
 
   factory PriceAlert.fromFirestore(DocumentSnapshot doc) {
@@ -57,6 +60,7 @@ class PriceAlert {
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       scope: scopeStr == 'keyword' ? AlertScope.keyword : AlertScope.product,
       keyword: data['keyword'] as String?,
+      category: data['category'] as String?,
     );
   }
 
@@ -74,5 +78,6 @@ class PriceAlert {
         'lastTriggered': null,
         'scope': scope == AlertScope.keyword ? 'keyword' : 'product',
         'keyword': keyword,
+        'category': category,
       };
 }

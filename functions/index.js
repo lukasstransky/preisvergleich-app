@@ -108,8 +108,13 @@ async function _handleKeywordAlert(doc, alert, index, batch, notifications) {
     filters = `price <= ${alert.targetPrice}`;
   }
 
+  const facetFilters = alert.category
+    ? [[`normalizedCategory:${alert.category}`]]
+    : undefined;
+
   const result = await index.search(alert.keyword, {
     filters,
+    facetFilters,
     hitsPerPage: 5,
     attributesToRetrieve: ['name', 'price', 'supermarket'],
   });

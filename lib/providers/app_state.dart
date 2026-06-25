@@ -396,11 +396,13 @@ class AppState extends ChangeNotifier {
     required String keyword,
     required AlertType alertType,
     double? targetPrice,
+    String? category,
   }) async {
     await _priceAlertService.createKeywordAlert(
       keyword: keyword,
       alertType: alertType,
       targetPrice: targetPrice,
+      category: category,
     );
     await _loadPriceAlerts();
   }

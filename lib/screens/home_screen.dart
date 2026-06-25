@@ -177,7 +177,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showKeywordAlertDialog(BuildContext context, AppState appState, String keyword) {
     showDialog(
       context: context,
-      builder: (_) => _KeywordAlertDialog(keyword: keyword),
+      builder: (_) => _KeywordAlertDialog(
+        keyword: keyword,
+        preselectedCategory: appState.selectedCategory,
+      ),
     );
   }
 
@@ -358,9 +361,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _KeywordAlertDialog extends StatelessWidget {
+class _KeywordAlertDialog extends StatefulWidget {
   final String keyword;
-  const _KeywordAlertDialog({required this.keyword});
+  final String? preselectedCategory;
+  const _KeywordAlertDialog({required this.keyword, this.preselectedCategory});
+
+  @override
+  State<_KeywordAlertDialog> createState() => _KeywordAlertDialogState();
+}
+
+class _KeywordAlertDialogState extends State<_KeywordAlertDialog> {
+  late String? _category;
+
+  @override
+  void initState() {
+    super.initState();
+    _category = widget.preselectedCategory;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -373,28 +390,62 @@ class _KeywordAlertDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: c.primarySoft,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.search, size: 14, color: c.primary),
-                const SizedBox(width: 6),
-                Text(
-                  '"$keyword"',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: c.primary,
-                      fontSize: 13),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: c.primarySoft,
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.search, size: 14, color: c.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      '"${widget.keyword}"',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: c.primary,
+                          fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              if (_category != null)
+                GestureDetector(
+                  onTap: () => setState(() => _category = null),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: c.surfaceAlt,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: c.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.label_outline_rounded, size: 13, color: c.textSecondary),
+                        const SizedBox(width: 5),
+                        Text(
+                          _category!,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: c.textSecondary,
+                              fontSize: 12),
+                        ),
+                        const SizedBox(width: 5),
+                        Icon(Icons.close_rounded, size: 12, color: c.textTertiary),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             'Du wirst benachrichtigt wenn ein passendes Produkt im Angebot ist.',
             style: TextStyle(color: c.textSecondary, fontSize: 12),
@@ -415,11 +466,13 @@ class _KeywordAlertDialog extends StatelessWidget {
           onPressed: () async {
             final appState = context.read<AppState>();
             final messenger = ScaffoldMessenger.of(context);
+            final category = _category;
             Navigator.pop(context);
             try {
               await appState.setKeywordAlert(
-                keyword: keyword,
+                keyword: widget.keyword,
                 alertType: AlertType.promotion,
+                category: category,
               );
               messenger
                 ..clearSnackBars()

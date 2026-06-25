@@ -34,7 +34,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color promoSoft;
 
   static AppColors of(BuildContext context) =>
-      Theme.of(context).extension<AppColors>()!;
+      Theme.of(context).extension<AppColors>() ?? dark;
 
   // Dark palette — same values as the original hardcoded palette
   static const dark = AppColors(
