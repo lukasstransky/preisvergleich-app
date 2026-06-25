@@ -21,6 +21,7 @@ class PriceAlertsScreen extends StatelessWidget {
           final alerts = appState.priceAlerts;
 
           if (alerts.isEmpty) {
+            final c = AppColors.of(context);
             return Column(
               children: [
                 _SearchPromoBanner(onGoToSearch: onGoToSearch),
@@ -33,23 +34,22 @@ class PriceAlertsScreen extends StatelessWidget {
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceAlt,
+                            color: c.surfaceAlt,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(Icons.notifications_none,
-                              size: 40, color: AppColors.textTertiary),
+                              size: 40, color: c.textTertiary),
                         ),
                         const SizedBox(height: 16),
-                        const Text('Keine Preisalarme',
+                        Text('Keine Preisalarme',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary)),
+                                color: c.textPrimary)),
                         const SizedBox(height: 8),
                         Text(
                           'Tippe auf ein Produkt und setze einen\nPreisalarm um benachrichtigt zu werden.',
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                          style: TextStyle(color: c.textSecondary, fontSize: 14),
                         ),
                       ],
                     ),
@@ -87,14 +87,15 @@ class _SearchPromoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.primary, Color(0xFF177A50)],
+          colors: [c.primary, const Color(0xFF177A50)],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -146,10 +147,10 @@ class _SearchPromoBanner extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Text(
+              child: Text(
                 'Zur Suche',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: c.primary,
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
                 ),
@@ -171,6 +172,7 @@ class _AlertTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final appState = context.read<AppState>();
 
     return Card(
@@ -183,10 +185,10 @@ class _AlertTile extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: c.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.search, color: AppColors.primary, size: 28),
+                child: Icon(Icons.search, color: c.primary, size: 28),
               )
             else if (alert.imageUrl != null)
               ClipRRect(
@@ -200,17 +202,17 @@ class _AlertTile extends StatelessWidget {
                     height: 60,
                     fit: BoxFit.cover,
                     placeholder: (_, _) => Container(
-                      color: AppColors.surfaceAlt,
-                      child: const Center(
+                      color: c.surfaceAlt,
+                      child: Center(
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
-                          color: AppColors.textTertiary,
+                          color: c.textTertiary,
                         ),
                       ),
                     ),
                     errorWidget: (_, _, _) => Container(
-                      color: AppColors.surfaceAlt,
-                      child: const Icon(Icons.shopping_basket, color: AppColors.textTertiary),
+                      color: c.surfaceAlt,
+                      child: Icon(Icons.shopping_basket, color: c.textTertiary),
                     ),
                   ),
                 ),
@@ -220,10 +222,10 @@ class _AlertTile extends StatelessWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceAlt,
+                  color: c.surfaceAlt,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.shopping_basket, color: AppColors.textTertiary),
+                child: Icon(Icons.shopping_basket, color: c.textTertiary),
               ),
             const SizedBox(width: 12),
             Expanded(
@@ -247,15 +249,15 @@ class _AlertTile extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
+                            color: c.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                             border: Border.all(
-                                color: AppColors.primary.withValues(alpha: 0.4)),
+                                color: c.primary.withValues(alpha: 0.4)),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Suchbegriff',
                             style: TextStyle(
-                                color: AppColors.primary,
+                                color: c.primary,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -282,13 +284,13 @@ class _AlertTile extends StatelessWidget {
                             ? Icons.local_offer_outlined
                             : Icons.price_check,
                         size: 13,
-                        color: AppColors.primary,
+                        color: c.primary,
                       ),
                       const SizedBox(width: 3),
                       Text(
                         alert.alertDescription,
-                        style: const TextStyle(
-                            color: AppColors.primary,
+                        style: TextStyle(
+                            color: c.primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w500),
                       ),
@@ -298,15 +300,15 @@ class _AlertTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Aktuell: €${alert.currentPrice.toStringAsFixed(2)}',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                      style: TextStyle(color: c.textSecondary, fontSize: 11),
                     ),
                   ],
                 ],
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.notifications_off_outlined,
-                  color: AppColors.danger, size: 22),
+              icon: Icon(Icons.notifications_off_outlined,
+                  color: c.danger, size: 22),
               tooltip: 'Alarm entfernen',
               onPressed: () async {
                 if (alert.isKeywordAlert) {

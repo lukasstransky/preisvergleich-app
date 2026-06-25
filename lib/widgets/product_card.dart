@@ -13,14 +13,13 @@ class ProductCard extends StatelessWidget {
 
   const ProductCard({super.key, required this.product});
 
-  static const _primary = AppColors.primary;
-
   Color _supermarketColor(String s) => AppColors.supermarket(s);
 
   bool _lightText(String s) => !AppColors.supermarketNeedsDarkText(s);
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final appState = context.watch<AppState>();
     final isInList = appState.isInShoppingList(product.id);
     final isFav = appState.isFavorite(product.id);
@@ -29,9 +28,9 @@ class ProductCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: c.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: c.border),
         ),
         child: Material(
           color: Colors.transparent,
@@ -44,11 +43,11 @@ class ProductCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildImage(context),
+                  _buildImage(context, c),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildInfo()),
+                  Expanded(child: _buildInfo(c)),
                   const SizedBox(width: 8),
-                  _buildActionColumn(context, isInList, isFav),
+                  _buildActionColumn(context, c, isInList, isFav),
                 ],
               ),
             ),
@@ -58,7 +57,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(BuildContext context) {
+  Widget _buildImage(BuildContext context, AppColors c) {
     final appState = context.watch<AppState>();
     final hasAlert = appState.hasAlert(product.id);
     final isFav = appState.isFavorite(product.id);
@@ -76,24 +75,24 @@ class ProductCard extends StatelessWidget {
                       imageUrl: product.imageUrl!,
                       fit: BoxFit.cover,
                       placeholder: (_, _) => Container(
-                        color: AppColors.surfaceAlt,
-                        child: const Center(
+                        color: c.surfaceAlt,
+                        child: Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 1.5,
-                            color: AppColors.textTertiary,
+                            color: c.textTertiary,
                           ),
                         ),
                       ),
                       errorWidget: (_, _, _) => Container(
-                        color: AppColors.surfaceAlt,
-                        child: const Icon(Icons.shopping_basket_outlined,
-                            color: AppColors.textTertiary, size: 28),
+                        color: c.surfaceAlt,
+                        child: Icon(Icons.shopping_basket_outlined,
+                            color: c.textTertiary, size: 28),
                       ),
                     )
                   : Container(
-                      color: AppColors.surfaceAlt,
-                      child: const Icon(Icons.shopping_basket_outlined,
-                          color: AppColors.textTertiary, size: 28),
+                      color: c.surfaceAlt,
+                      child: Icon(Icons.shopping_basket_outlined,
+                          color: c.textTertiary, size: 28),
                     ),
             ),
           ),
@@ -103,9 +102,9 @@ class ProductCard extends StatelessWidget {
               left: 0,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                decoration: const BoxDecoration(
-                  color: AppColors.danger,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: c.danger,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(10),
                     bottomRight: Radius.circular(8),
                   ),
@@ -125,9 +124,9 @@ class ProductCard extends StatelessWidget {
               child: Container(
                 width: 20,
                 height: 20,
-                decoration: const BoxDecoration(
-                  color: _primary,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: c.primary,
+                  borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(10),
                     bottomLeft: Radius.circular(8),
                   ),
@@ -143,9 +142,9 @@ class ProductCard extends StatelessWidget {
               child: Container(
                 width: 20,
                 height: 20,
-                decoration: const BoxDecoration(
-                  color: AppColors.danger,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: c.danger,
+                  borderRadius: const BorderRadius.only(
                     bottomRight: Radius.circular(10),
                     topLeft: Radius.circular(8),
                   ),
@@ -159,7 +158,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfo() {
+  Widget _buildInfo(AppColors c) {
     final color = _supermarketColor(product.supermarket);
     final light = _lightText(product.supermarket);
 
@@ -168,10 +167,10 @@ class ProductCard extends StatelessWidget {
       children: [
         Text(
           product.name,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 14,
-            color: AppColors.textPrimary,
+            color: c.textPrimary,
             height: 1.3,
             letterSpacing: -0.2,
           ),
@@ -204,13 +203,13 @@ class ProductCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.promoSoft,
+                  color: c.promoSoft,
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   product.promotionText!,
-                  style: const TextStyle(
-                    color: AppColors.promo,
+                  style: TextStyle(
+                    color: c.promo,
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
                   ),
@@ -229,8 +228,8 @@ class ProductCard extends StatelessWidget {
                 fontWeight: FontWeight.w800,
                 fontSize: 18,
                 color: product.inPromotion
-                    ? AppColors.danger
-                    : AppColors.textPrimary,
+                    ? c.danger
+                    : c.textPrimary,
                 letterSpacing: -0.5,
                 height: 1,
               ),
@@ -243,7 +242,7 @@ class ProductCard extends StatelessWidget {
                   product.formattedOriginalPrice!,
                   style: TextStyle(
                     decoration: TextDecoration.lineThrough,
-                    color: AppColors.textTertiary,
+                    color: c.textTertiary,
                     fontSize: 12,
                     height: 1,
                   ),
@@ -258,7 +257,7 @@ class ProductCard extends StatelessWidget {
             child: Text(
               product.formattedUnitPrice!,
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: c.textSecondary,
                 fontSize: 11,
                 letterSpacing: -0.1,
               ),
@@ -268,7 +267,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionColumn(BuildContext context, bool isInList, bool isFav) {
+  Widget _buildActionColumn(BuildContext context, AppColors c, bool isInList, bool isFav) {
     final appState = context.read<AppState>();
 
     final favBtn = GestureDetector(
@@ -278,7 +277,7 @@ class ProductCard extends StatelessWidget {
         child: Icon(
           isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
           size: 18,
-          color: isFav ? AppColors.danger : AppColors.textTertiary,
+          color: isFav ? c.danger : c.textTertiary,
         ),
       ),
     );
@@ -310,10 +309,10 @@ class ProductCard extends StatelessWidget {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: _primary,
+                  color: c.primary,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.add, color: AppColors.onPrimary, size: 20),
+                child: Icon(Icons.add, color: c.onPrimary, size: 20),
               ),
             ),
           ),
@@ -332,9 +331,9 @@ class ProductCard extends StatelessWidget {
           padding: const EdgeInsets.only(top: 2),
           child: Container(
             decoration: BoxDecoration(
-              color: _primary.withValues(alpha: 0.06),
+              color: c.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _primary.withValues(alpha: 0.2)),
+              border: Border.all(color: c.primary.withValues(alpha: 0.2)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -344,23 +343,23 @@ class ProductCard extends StatelessWidget {
                       ? Icons.delete_outline_rounded
                       : Icons.remove_rounded,
                   color: quantity == 1
-                      ? AppColors.danger
-                      : AppColors.textSecondary,
+                      ? c.danger
+                      : c.textSecondary,
                   onTap: () => appState.decrementQuantity(product.id),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text(
                     '$quantity',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
-                        color: _primary),
+                        color: c.primary),
                   ),
                 ),
                 _QtyBtn(
                   icon: Icons.add_rounded,
-                  color: _primary,
+                  color: c.primary,
                   onTap: () => appState.incrementQuantity(product.id),
                 ),
               ],
@@ -416,13 +415,14 @@ class _ProductDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Consumer<AppState>(
       builder: (_, appState, _) {
         final alert = appState.getAlert(product.id);
         return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: c.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: EdgeInsets.only(
             left: 20,
@@ -440,7 +440,7 @@ class _ProductDetailSheet extends StatelessWidget {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceHigh,
+                    color: c.surfaceHigh,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -467,18 +467,19 @@ class _ProductDetailSheet extends StatelessWidget {
                       children: [
                         Text(
                           product.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.5,
                             height: 1.2,
+                            color: c.textPrimary,
                           ),
                         ),
                         if (product.brand != null) ...[
                           const SizedBox(height: 4),
                           Text(product.brand!,
                               style: TextStyle(
-                                  color: AppColors.textSecondary, fontSize: 13)),
+                                  color: c.textSecondary, fontSize: 13)),
                         ],
                       ],
                     ),
@@ -514,8 +515,8 @@ class _ProductDetailSheet extends StatelessWidget {
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
                       color: product.inPromotion
-                          ? AppColors.danger
-                          : AppColors.textPrimary,
+                          ? c.danger
+                          : c.textPrimary,
                       letterSpacing: -1,
                       height: 1,
                     ),
@@ -528,7 +529,7 @@ class _ProductDetailSheet extends StatelessWidget {
                         product.formattedOriginalPrice!,
                         style: TextStyle(
                           decoration: TextDecoration.lineThrough,
-                          color: AppColors.textTertiary,
+                          color: c.textTertiary,
                           fontSize: 15,
                         ),
                       ),
@@ -539,7 +540,7 @@ class _ProductDetailSheet extends StatelessWidget {
                     Text(
                       product.formattedUnitPrice!,
                       style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: c.textSecondary,
                           fontSize: 13),
                     ),
                 ],
@@ -548,7 +549,7 @@ class _ProductDetailSheet extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   product.category!,
-                  style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+                  style: TextStyle(color: c.textTertiary, fontSize: 12),
                 ),
               ],
               if (product.formattedOfferPeriod != null) ...[
@@ -556,12 +557,12 @@ class _ProductDetailSheet extends StatelessWidget {
                 Row(
                   children: [
                     Icon(Icons.calendar_today_rounded,
-                        size: 13, color: AppColors.textTertiary),
+                        size: 13, color: c.textTertiary),
                     const SizedBox(width: 5),
                     Text(
                       'Angebot: ${product.formattedOfferPeriod!}',
                       style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: c.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w500),
                     ),
@@ -579,8 +580,8 @@ class _ProductDetailSheet extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      side: BorderSide(color: AppColors.border),
+                      foregroundColor: c.textSecondary,
+                      side: BorderSide(color: c.border),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
@@ -627,13 +628,14 @@ class _ActiveAlertRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.06),
+        color: c.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: AppColors.primary.withValues(alpha: 0.2)),
+            color: c.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
@@ -641,31 +643,31 @@ class _ActiveAlertRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: c.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.notifications_active_rounded,
-                color: AppColors.primary, size: 18),
+            child: Icon(Icons.notifications_active_rounded,
+                color: c.primary, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Preisalarm aktiv',
+                Text('Preisalarm aktiv',
                     style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: AppColors.textPrimary)),
+                        color: c.textPrimary)),
                 Text(alert.alertDescription,
                     style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 12)),
+                        color: c.textSecondary, fontSize: 12)),
               ],
             ),
           ),
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.danger,
+              foregroundColor: c.danger,
               padding: const EdgeInsets.symmetric(horizontal: 8),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -698,6 +700,7 @@ class _SetAlertButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext _) {
+    final c = AppColors.of(context);
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -705,8 +708,8 @@ class _SetAlertButton extends StatelessWidget {
         label: const Text('Preisalarm setzen',
             style: TextStyle(fontWeight: FontWeight.w600)),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          foregroundColor: c.primary,
+          side: BorderSide(color: c.primary, width: 1.5),
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14)),
@@ -749,6 +752,7 @@ class _AlertDialogState extends State<_AlertDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       contentPadding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -760,7 +764,7 @@ class _AlertDialogState extends State<_AlertDialog> {
         children: [
           Text(widget.product.name,
               style: TextStyle(
-                  fontSize: 13, color: AppColors.textSecondary, height: 1.3),
+                  fontSize: 13, color: c.textSecondary, height: 1.3),
               maxLines: 2,
               overflow: TextOverflow.ellipsis),
           const SizedBox(height: 16),
@@ -798,7 +802,7 @@ class _AlertDialogState extends State<_AlertDialog> {
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text('Abbrechen',
-              style: TextStyle(color: AppColors.textSecondary)),
+              style: TextStyle(color: c.textSecondary)),
         ),
         ElevatedButton(
           onPressed: () async {
@@ -856,6 +860,7 @@ class _AlertOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final selected = value == group;
     return GestureDetector(
       onTap: () => onChanged(value),
@@ -864,12 +869,12 @@ class _AlertOption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primary.withValues(alpha: 0.06)
-              : AppColors.surfaceAlt,
+              ? c.primary.withValues(alpha: 0.06)
+              : c.surfaceAlt,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected
-                ? AppColors.primary.withValues(alpha: 0.35)
+                ? c.primary.withValues(alpha: 0.35)
                 : Colors.transparent,
             width: 1.5,
           ),
@@ -885,12 +890,12 @@ class _AlertOption extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
                           color: selected
-                              ? AppColors.primary
-                              : AppColors.textPrimary)),
+                              ? c.primary
+                              : c.textPrimary)),
                   const SizedBox(height: 2),
                   Text(subtitle,
                       style: TextStyle(
-                          fontSize: 12, color: AppColors.textSecondary)),
+                          fontSize: 12, color: c.textSecondary)),
                 ],
               ),
             ),
@@ -900,7 +905,7 @@ class _AlertOption extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected ? AppColors.primary : AppColors.textTertiary,
+                  color: selected ? c.primary : c.textTertiary,
                   width: 2,
                 ),
               ),
@@ -909,9 +914,9 @@ class _AlertOption extends StatelessWidget {
                       child: Container(
                         width: 10,
                         height: 10,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.primary,
+                          color: c.primary,
                         ),
                       ),
                     )

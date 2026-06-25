@@ -17,6 +17,7 @@ class SupermarketFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final appState = context.watch<AppState>();
     final selected = appState.selectedSupermarkets;
 
@@ -29,31 +30,6 @@ class SupermarketFilter extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(14, 0, 0, 6),
-          child: Row(
-            children: [
-              const Text(
-                'Supermärkte',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(width: 4),
-              GestureDetector(
-                onTap: () => _showDataInfoSheet(context),
-                child: const Icon(
-                  Icons.info_outline_rounded,
-                  size: 14,
-                  color: AppColors.textTertiary,
-                ),
-              ),
-            ],
-          ),
-        ),
         SizedBox(
           height: 34,
           child: ListView(
@@ -74,10 +50,18 @@ class SupermarketFilter extends StatelessWidget {
                   ),
                 );
               }),
+              GestureDetector(
+                onTap: () => _showDataInfoSheet(context),
+                child: Icon(
+                  Icons.info_outline_rounded,
+                  size: 16,
+                  color: c.textTertiary,
+                ),
+              ),
             ],
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
       ],
     );
   }
@@ -160,10 +144,11 @@ class _DataInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: c.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: EdgeInsets.only(
         left: 20,
@@ -180,26 +165,26 @@ class _DataInfoSheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surfaceHigh,
+                color: c.surfaceHigh,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Verfügbare Daten',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.4,
-              color: AppColors.textPrimary,
+              color: c.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Je nach Supermarkt sind unterschiedliche Produktdaten verfügbar.',
             style: TextStyle(
-                fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                fontSize: 13, color: c.textSecondary, height: 1.4),
           ),
           const SizedBox(height: 20),
           const _SectionLabel(label: 'Vollsortiment'),
@@ -217,20 +202,20 @@ class _DataInfoSheet extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.surfaceAlt,
+              color: c.surfaceAlt,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Icon(Icons.lightbulb_outline_rounded,
-                    size: 14, color: AppColors.textSecondary),
-                SizedBox(width: 8),
+                    size: 14, color: c.textSecondary),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Bei Supermärkten mit Vollsortiment findest du auch Produkte ohne aktive Angebote.',
                     style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: c.textSecondary,
                         height: 1.4),
                   ),
                 ),
@@ -249,13 +234,14 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Text(
       label.toUpperCase(),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 10,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
-        color: AppColors.textTertiary,
+        color: c.textTertiary,
       ),
     );
   }
@@ -267,6 +253,7 @@ class _DataInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -285,10 +272,10 @@ class _DataInfoRow extends StatelessWidget {
             width: 54,
             child: Text(
               info.name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
               ),
             ),
           ),
@@ -296,8 +283,8 @@ class _DataInfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               info.description,
-              style: const TextStyle(
-                  fontSize: 13, color: AppColors.textSecondary),
+              style: TextStyle(
+                  fontSize: 13, color: c.textSecondary),
             ),
           ),
         ],
@@ -314,16 +301,17 @@ class _AllChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return GestureDetector(
       onTap: () => context.read<AppState>().selectAllSupermarkets(),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: allSelected ? AppColors.primary : AppColors.surfaceAlt,
+          color: allSelected ? c.primary : c.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: allSelected ? AppColors.primary : AppColors.border,
+            color: allSelected ? c.primary : c.border,
             width: 1.5,
           ),
         ),
@@ -331,16 +319,16 @@ class _AllChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (allSelected) ...[
-              const Icon(Icons.check_rounded,
-                  size: 13, color: AppColors.onPrimary),
+              Icon(Icons.check_rounded,
+                  size: 13, color: c.onPrimary),
               const SizedBox(width: 4),
             ],
             Text(
               'Alle',
               style: TextStyle(
                 color: allSelected
-                    ? AppColors.onPrimary
-                    : AppColors.textSecondary,
+                    ? c.onPrimary
+                    : c.textSecondary,
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
                 letterSpacing: -0.2,
@@ -368,6 +356,7 @@ class _SupermarketChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return GestureDetector(
       onTap: () => context.read<AppState>().toggleSupermarket(supermarket),
       child: AnimatedContainer(
@@ -376,10 +365,10 @@ class _SupermarketChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? color.withValues(alpha: 0.18)
-              : AppColors.surfaceAlt,
+              : c.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? color : AppColors.border,
+            color: isSelected ? color : c.border,
             width: 1.5,
           ),
         ),
@@ -390,7 +379,7 @@ class _SupermarketChip extends StatelessWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: isSelected ? color : AppColors.textTertiary,
+                color: isSelected ? color : c.textTertiary,
                 shape: BoxShape.circle,
               ),
             ),
@@ -399,8 +388,8 @@ class _SupermarketChip extends StatelessWidget {
               label,
               style: TextStyle(
                 color: isSelected
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
+                    ? c.textPrimary
+                    : c.textSecondary,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 fontSize: 13,
                 letterSpacing: -0.2,

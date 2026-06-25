@@ -9,6 +9,7 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favoriten'),
@@ -28,27 +29,27 @@ class FavoritesScreen extends StatelessWidget {
                       width: 72,
                       height: 72,
                       decoration: BoxDecoration(
-                        color: AppColors.danger.withValues(alpha: 0.14),
+                        color: c.danger.withValues(alpha: 0.14),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.favorite_border_rounded,
-                          size: 34, color: AppColors.danger),
+                      child: Icon(Icons.favorite_border_rounded,
+                          size: 34, color: c.danger),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Keine Favoriten',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
-                        color: AppColors.textPrimary,
+                        color: c.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Tippe auf das Herz-Symbol bei einem Produkt, um es als Favorit zu speichern.',
                       style: TextStyle(
-                          color: AppColors.textSecondary, fontSize: 14, height: 1.6),
+                          color: c.textSecondary, fontSize: 14, height: 1.6),
                       textAlign: TextAlign.center,
                     ),
                   ],

@@ -43,6 +43,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final c = AppColors.of(context);
     final list = appState.activeList;
     final items = appState.shoppingListItems;
     final checkedCount = _checkedItems.intersection(items.map((i) => i.product.id).toSet()).length;
@@ -74,32 +75,32 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         ],
       ),
       body: items.isEmpty
-          ? _buildEmptyState()
-          : _buildBody(context, appState, items),
+          ? _buildEmptyState(c)
+          : _buildBody(context, c, appState, items),
       bottomNavigationBar: items.isNotEmpty
-          ? _buildTotalBar(appState, checkedCount, items.length)
+          ? _buildTotalBar(c, appState, checkedCount, items.length)
           : null,
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppColors c) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_cart_outlined, size: 80, color: AppColors.textTertiary),
+          Icon(Icons.shopping_cart_outlined, size: 80, color: c.textTertiary),
           const SizedBox(height: 16),
           Text('Einkaufsliste ist leer',
-              style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+              style: TextStyle(fontSize: 18, color: c.textSecondary)),
           const SizedBox(height: 8),
           Text('Füge Produkte über die Suche hinzu',
-              style: TextStyle(color: AppColors.textSecondary)),
+              style: TextStyle(color: c.textSecondary)),
         ],
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, AppState appState, List<ShoppingListItem> items) {
+  Widget _buildBody(BuildContext context, AppColors c, AppState appState, List<ShoppingListItem> items) {
     final grouped = _groupBySupermarket(items);
     final supermarkets = grouped.keys.toList();
 
@@ -115,16 +116,16 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSupermarketHeader(supermarket, allItems.length, subtotal),
-            ...unchecked.map((item) => _buildItemTile(context, item, appState, false)),
-            ...checked.map((item) => _buildItemTile(context, item, appState, true)),
+            _buildSupermarketHeader(c, supermarket, allItems.length, subtotal),
+            ...unchecked.map((item) => _buildItemTile(context, c, item, appState, false)),
+            ...checked.map((item) => _buildItemTile(context, c, item, appState, true)),
           ],
         );
       }).toList(),
     );
   }
 
-  Widget _buildSupermarketHeader(String supermarket, int count, double subtotal) {
+  Widget _buildSupermarketHeader(AppColors c, String supermarket, int count, double subtotal) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       color: _getSupermarketColor(supermarket).withValues(alpha: 0.1),
@@ -147,7 +148,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(width: 8),
-              Text('($count)', style: TextStyle(color: AppColors.textSecondary)),
+              Text('($count)', style: TextStyle(color: c.textSecondary)),
             ],
           ),
           Text('€${subtotal.toStringAsFixed(2)}',
@@ -158,12 +159,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   }
 
   Widget _buildItemTile(
-      BuildContext context, ShoppingListItem item, AppState appState, bool isChecked) {
+      BuildContext context, AppColors c, ShoppingListItem item, AppState appState, bool isChecked) {
     return Dismissible(
       key: Key(item.product.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: AppColors.danger,
+        color: c.danger,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
         child: const Icon(Icons.delete, color: Colors.white),
@@ -197,18 +198,18 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                   height: 26,
                   decoration: BoxDecoration(
                     color: isChecked
-                        ? AppColors.primary
+                        ? c.primary
                         : Colors.transparent,
                     border: Border.all(
                       color: isChecked
-                          ? AppColors.primary
-                          : AppColors.border,
+                          ? c.primary
+                          : c.border,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: isChecked
-                      ? const Icon(Icons.check, color: AppColors.onPrimary, size: 16)
+                      ? Icon(Icons.check, color: c.onPrimary, size: 16)
                       : null,
                 ),
                 const SizedBox(width: 10),
@@ -223,12 +224,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                             imageUrl: item.product.imageUrl!,
                             fit: BoxFit.cover,
                             errorWidget: (_, _, _) => Container(
-                              color: AppColors.surfaceAlt,
+                              color: c.surfaceAlt,
                               child: const Icon(Icons.shopping_basket, size: 22),
                             ),
                           )
                         : Container(
-                            color: AppColors.surfaceAlt,
+                            color: c.surfaceAlt,
                             child: const Icon(Icons.shopping_basket, size: 22),
                           ),
                   ),
@@ -251,7 +252,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                       if (item.product.brand != null)
                         Text(
                           item.product.brand!,
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                          style: TextStyle(color: c.textSecondary, fontSize: 12),
                         ),
                     ],
                   ),
@@ -271,12 +272,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                         if (item.quantity > 1)
                           Text(
                             '${item.quantity} × €${item.product.price.toStringAsFixed(2)}',
-                            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+                            style: TextStyle(color: c.textSecondary, fontSize: 11),
                           ),
                       ],
                     ),
                     const SizedBox(width: 8),
-                    if (!isChecked) _buildQuantityControls(item, appState),
+                    if (!isChecked) _buildQuantityControls(c, item, appState),
                   ],
                 ),
               ],
@@ -287,10 +288,10 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     );
   }
 
-  Widget _buildQuantityControls(ShoppingListItem item, AppState appState) {
+  Widget _buildQuantityControls(AppColors c, ShoppingListItem item, AppState appState) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -303,7 +304,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
               child: Icon(
                 item.quantity == 1 ? Icons.delete_outline : Icons.remove,
                 size: 18,
-                color: item.quantity == 1 ? AppColors.danger : AppColors.textSecondary,
+                color: item.quantity == 1 ? c.danger : c.textSecondary,
               ),
             ),
           ),
@@ -316,7 +317,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
             onTap: () => appState.incrementQuantity(item.product.id),
             child: Container(
               padding: const EdgeInsets.all(4),
-              child: Icon(Icons.add, size: 18, color: AppColors.textSecondary),
+              child: Icon(Icons.add, size: 18, color: c.textSecondary),
             ),
           ),
         ],
@@ -324,13 +325,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
     );
   }
 
-  Widget _buildTotalBar(AppState appState, int checkedCount, int totalCount) {
+  Widget _buildTotalBar(AppColors c, AppState appState, int checkedCount, int totalCount) {
     final remaining = totalCount - checkedCount;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: c.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.35),
@@ -353,8 +354,8 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                       : '$checkedCount von $totalCount erledigt',
                   style: TextStyle(
                     color: checkedCount > 0
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
+                        ? c.primary
+                        : c.textSecondary,
                     fontSize: 13,
                     fontWeight: checkedCount > 0 ? FontWeight.w600 : FontWeight.normal,
                   ),
@@ -388,25 +389,28 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   void _showClearConfirmation(BuildContext context, AppState appState) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Liste leeren?'),
-        content: const Text('Möchtest du alle Produkte aus der Liste entfernen?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () {
-              _checkedItems.clear();
-              appState.clearShoppingList();
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: const Text('Leeren'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final c = AppColors.of(context);
+        return AlertDialog(
+          title: const Text('Liste leeren?'),
+          content: const Text('Möchtest du alle Produkte aus der Liste entfernen?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () {
+                _checkedItems.clear();
+                appState.clearShoppingList();
+                Navigator.pop(context);
+              },
+              style: TextButton.styleFrom(foregroundColor: c.danger),
+              child: const Text('Leeren'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

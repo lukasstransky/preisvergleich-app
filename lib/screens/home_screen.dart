@@ -58,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final c = AppColors.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -67,14 +68,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
-              color: AppColors.bg,
+              color: c.bg,
               border: Border(
-                bottom: BorderSide(color: AppColors.border),
+                bottom: BorderSide(color: c.border),
               ),
             ),
-            child: Column(
+            child: const Column(
               children: [
                 SearchBarWidget(),
                 SupermarketFilter(),
@@ -83,10 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           if (appState.searchQuery.isNotEmpty)
             DecoratedBox(
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
+              decoration: BoxDecoration(
+                color: c.surface,
                 border: Border(
-                  bottom: BorderSide(color: AppColors.border),
+                  bottom: BorderSide(color: c.border),
                 ),
               ),
               child: Column(
@@ -96,14 +97,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          _buildResultsInfo(appState),
-          Expanded(child: _buildProductList(appState)),
+          _buildResultsInfo(context, appState),
+          Expanded(child: _buildProductList(context, appState)),
         ],
       ),
     );
   }
 
   Widget _buildKeywordAlertBanner(BuildContext context, AppState appState) {
+    final c = AppColors.of(context);
     final query = appState.searchQuery.trim();
     if (query.isEmpty) return const SizedBox.shrink();
 
@@ -111,27 +113,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (existingAlert != null) {
       return Container(
-        margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.primarySoft,
+          color: c.primarySoft,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
+          border: Border.all(color: c.primary.withValues(alpha: 0.35)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.notifications_active, size: 16, color: AppColors.primary),
+            Icon(Icons.notifications_active, size: 16, color: c.primary),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Alarm für "$query" · ${existingAlert.alertDescription}',
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    fontSize: 12, color: c.primary, fontWeight: FontWeight.w500),
               ),
             ),
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.danger,
+                foregroundColor: c.danger,
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -145,26 +147,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
       child: GestureDetector(
         onTap: () => _showKeywordAlertDialog(context, appState, query),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.surfaceAlt,
+            color: c.surfaceAlt,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: c.border),
           ),
           child: Row(
             children: [
-              const Icon(Icons.notifications_none, size: 16, color: AppColors.textSecondary),
+              Icon(Icons.notifications_none, size: 16, color: c.textSecondary),
               const SizedBox(width: 8),
               Text(
                 'Alarm für "$query" setzen',
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, color: c.textSecondary),
               ),
               const Spacer(),
-              const Icon(Icons.chevron_right, size: 16, color: AppColors.textTertiary),
+              Icon(Icons.chevron_right, size: 16, color: c.textTertiary),
             ],
           ),
         ),
@@ -179,7 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildResultsInfo(AppState appState) {
+  Widget _buildResultsInfo(BuildContext context, AppState appState) {
+    final c = AppColors.of(context);
     if (appState.isSearching || appState.searchQuery.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -190,8 +193,8 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             '${appState.searchResults.length} Ergebnisse',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: c.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w500,
               letterSpacing: -0.1,
@@ -204,17 +207,17 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceAlt,
+                  color: c.surfaceAlt,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.close_rounded, size: 11, color: AppColors.textSecondary),
+                    Icon(Icons.close_rounded, size: 11, color: c.textSecondary),
                     const SizedBox(width: 3),
-                    const Text('Filter zurücksetzen',
+                    Text('Filter zurücksetzen',
                         style: TextStyle(
-                            color: AppColors.textSecondary,
+                            color: c.textSecondary,
                             fontSize: 11,
                             fontWeight: FontWeight.w600)),
                   ],
@@ -227,18 +230,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductList(AppState appState) {
+  Widget _buildProductList(BuildContext context, AppState appState) {
+    final c = AppColors.of(context);
+
     if (appState.error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.danger),
+            Icon(Icons.error_outline, size: 48, color: c.danger),
             const SizedBox(height: 16),
             Text(
               appState.error!,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.danger),
+              style: TextStyle(color: c.danger),
             ),
           ],
         ),
@@ -260,28 +265,28 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: 72,
                 height: 72,
-                decoration: const BoxDecoration(
-                  color: AppColors.primarySoft,
+                decoration: BoxDecoration(
+                  color: c.primarySoft,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.search_rounded,
-                    size: 34, color: AppColors.primary),
+                child: Icon(Icons.search_rounded,
+                    size: 34, color: c.primary),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Preise vergleichen',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.5,
-                  color: AppColors.textPrimary,
+                  color: c.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Such nach Lebensmitteln und vergleiche die Preise aller Supermärkte auf einen Blick.',
                 style: TextStyle(
-                    color: AppColors.textSecondary, fontSize: 14, height: 1.6),
+                    color: c.textSecondary, fontSize: 14, height: 1.6),
                 textAlign: TextAlign.center,
               ),
                   ],
@@ -294,9 +299,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (appState.isSearching) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.primary,
+          color: c.primary,
           strokeWidth: 2,
         ),
       );
@@ -313,23 +318,23 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 width: 72,
                 height: 72,
-                decoration: const BoxDecoration(
-                    color: AppColors.surfaceAlt, shape: BoxShape.circle),
-                child: const Icon(Icons.search_off_rounded,
-                    size: 34, color: AppColors.textTertiary),
+                decoration: BoxDecoration(
+                    color: c.surfaceAlt, shape: BoxShape.circle),
+                child: Icon(Icons.search_off_rounded,
+                    size: 34, color: c.textTertiary),
               ),
               const SizedBox(height: 20),
-              const Text('Keine Ergebnisse',
+              Text('Keine Ergebnisse',
                   style: TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.4,
-                      color: AppColors.textPrimary)),
+                      color: c.textPrimary)),
               const SizedBox(height: 8),
               Text(
                 'Für "${appState.searchQuery}" wurden keine Produkte gefunden.',
-                style: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 14, height: 1.5),
+                style: TextStyle(
+                    color: c.textSecondary, fontSize: 14, height: 1.5),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -359,6 +364,7 @@ class _KeywordAlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Text('Preisalarm setzen',
@@ -370,28 +376,28 @@ class _KeywordAlertDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primarySoft,
+              color: c.primarySoft,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.search, size: 14, color: AppColors.primary),
+                Icon(Icons.search, size: 14, color: c.primary),
                 const SizedBox(width: 6),
                 Text(
                   '"$keyword"',
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
+                      color: c.primary,
                       fontSize: 13),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Du wirst benachrichtigt wenn ein passendes Produkt im Angebot ist.',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+            style: TextStyle(color: c.textSecondary, fontSize: 12),
           ),
         ],
       ),
@@ -402,8 +408,8 @@ class _KeywordAlertDialog extends StatelessWidget {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1B8A5A),
-            foregroundColor: Colors.white,
+            backgroundColor: c.primary,
+            foregroundColor: c.onPrimary,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           onPressed: () async {

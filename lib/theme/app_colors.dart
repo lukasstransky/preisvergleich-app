@@ -1,51 +1,78 @@
 import 'package:flutter/material.dart';
 
-/// Central dark-mode design tokens for the app.
-///
-/// Keeping every colour in one place makes the dark theme consistent across
-/// screens and avoids the scattered hard-coded hex values we had before.
-class AppColors {
-  AppColors._();
+class AppColors extends ThemeExtension<AppColors> {
+  const AppColors({
+    required this.bg,
+    required this.surface,
+    required this.surfaceAlt,
+    required this.surfaceHigh,
+    required this.border,
+    required this.primary,
+    required this.onPrimary,
+    required this.primarySoft,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textTertiary,
+    required this.danger,
+    required this.promo,
+    required this.promoSoft,
+  });
 
-  // ── Surfaces ──────────────────────────────────────────────────────────────
-  /// App / scaffold background (near-black).
-  static const bg = Color(0xFF0E1014);
+  final Color bg;
+  final Color surface;
+  final Color surfaceAlt;
+  final Color surfaceHigh;
+  final Color border;
+  final Color primary;
+  final Color onPrimary;
+  final Color primarySoft;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textTertiary;
+  final Color danger;
+  final Color promo;
+  final Color promoSoft;
 
-  /// Elevated surfaces: cards, app bar, bottom nav, sheets.
-  static const surface = Color(0xFF181B22);
+  static AppColors of(BuildContext context) =>
+      Theme.of(context).extension<AppColors>()!;
 
-  /// Inputs, unselected chips, subtle fills.
-  static const surfaceAlt = Color(0xFF22262F);
+  // Dark palette — same values as the original hardcoded palette
+  static const dark = AppColors(
+    bg: Color(0xFF0E1014),
+    surface: Color(0xFF181B22),
+    surfaceAlt: Color(0xFF22262F),
+    surfaceHigh: Color(0xFF2B313B),
+    border: Color(0xFF272B34),
+    primary: Color(0xFF2ED47A),
+    onPrimary: Color(0xFF06140C),
+    primarySoft: Color(0x1F2ED47A),
+    textPrimary: Color(0xFFEFF1F5),
+    textSecondary: Color(0xFF9BA3B2),
+    textTertiary: Color(0xFF6A7280),
+    danger: Color(0xFFFF6B6B),
+    promo: Color(0xFFFBBF24),
+    promoSoft: Color(0x26FBBF24),
+  );
 
-  /// Pressed / hovered / higher elevation.
-  static const surfaceHigh = Color(0xFF2B313B);
+  // Light palette
+  static const light = AppColors(
+    bg: Color(0xFFF5F7FA),
+    surface: Color(0xFFFFFFFF),
+    surfaceAlt: Color(0xFFEEF0F4),
+    surfaceHigh: Color(0xFFE4E7ED),
+    border: Color(0xFFDDE0E8),
+    primary: Color(0xFF2ED47A),
+    onPrimary: Color(0xFF06140C),
+    primarySoft: Color(0x1F2ED47A),
+    textPrimary: Color(0xFF0D1117),
+    textSecondary: Color(0xFF4B5563),
+    textTertiary: Color(0xFF9CA3AF),
+    danger: Color(0xFFEF4444),
+    promo: Color(0xFFD97706),
+    promoSoft: Color(0x26D97706),
+  );
 
-  /// Hairline borders & dividers.
-  static const border = Color(0xFF272B34);
-
-  // ── Brand ─────────────────────────────────────────────────────────────────
-  /// Vivid emerald accent that reads well on dark.
-  static const primary = Color(0xFF2ED47A);
-
-  /// Text/icon colour to place on top of [primary] fills.
-  static const onPrimary = Color(0xFF06140C);
-
-  /// Subtle green-tinted fill (use for soft highlights).
-  static const primarySoft = Color(0x1F2ED47A); // ~12% primary
-
-  // ── Text ──────────────────────────────────────────────────────────────────
-  static const textPrimary = Color(0xFFEFF1F5);
-  static const textSecondary = Color(0xFF9BA3B2);
-  static const textTertiary = Color(0xFF6A7280);
-
-  // ── Accents ───────────────────────────────────────────────────────────────
-  static const danger = Color(0xFFFF6B6B);
-  static const promo = Color(0xFFFBBF24);
-  static const promoSoft = Color(0x26FBBF24); // ~15% promo
-
-  // ── Supermarket brand colours ──────────────────────────────────────────────
-  /// Brightened slightly where needed so dark navy brands stay legible on a
-  /// dark background.
+  // Keep supermarket brand colors as static (they are branding, not theme-dependent)
   static Color supermarket(String s) {
     switch (s.toLowerCase()) {
       case 'spar':
@@ -67,4 +94,56 @@ class AppColors {
 
   /// Whether text on top of a supermarket badge should be dark.
   static bool supermarketNeedsDarkText(String s) => s.toLowerCase() == 'billa';
+
+  @override
+  AppColors copyWith({
+    Color? bg,
+    Color? surface,
+    Color? surfaceAlt,
+    Color? surfaceHigh,
+    Color? border,
+    Color? primary,
+    Color? onPrimary,
+    Color? primarySoft,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textTertiary,
+    Color? danger,
+    Color? promo,
+    Color? promoSoft,
+  }) =>
+      AppColors(
+        bg: bg ?? this.bg,
+        surface: surface ?? this.surface,
+        surfaceAlt: surfaceAlt ?? this.surfaceAlt,
+        surfaceHigh: surfaceHigh ?? this.surfaceHigh,
+        border: border ?? this.border,
+        primary: primary ?? this.primary,
+        onPrimary: onPrimary ?? this.onPrimary,
+        primarySoft: primarySoft ?? this.primarySoft,
+        textPrimary: textPrimary ?? this.textPrimary,
+        textSecondary: textSecondary ?? this.textSecondary,
+        textTertiary: textTertiary ?? this.textTertiary,
+        danger: danger ?? this.danger,
+        promo: promo ?? this.promo,
+        promoSoft: promoSoft ?? this.promoSoft,
+      );
+
+  @override
+  AppColors lerp(AppColors? other, double t) => AppColors(
+        bg: Color.lerp(bg, other?.bg, t)!,
+        surface: Color.lerp(surface, other?.surface, t)!,
+        surfaceAlt: Color.lerp(surfaceAlt, other?.surfaceAlt, t)!,
+        surfaceHigh: Color.lerp(surfaceHigh, other?.surfaceHigh, t)!,
+        border: Color.lerp(border, other?.border, t)!,
+        primary: Color.lerp(primary, other?.primary, t)!,
+        onPrimary: Color.lerp(onPrimary, other?.onPrimary, t)!,
+        primarySoft: Color.lerp(primarySoft, other?.primarySoft, t)!,
+        textPrimary: Color.lerp(textPrimary, other?.textPrimary, t)!,
+        textSecondary: Color.lerp(textSecondary, other?.textSecondary, t)!,
+        textTertiary: Color.lerp(textTertiary, other?.textTertiary, t)!,
+        danger: Color.lerp(danger, other?.danger, t)!,
+        promo: Color.lerp(promo, other?.promo, t)!,
+        promoSoft: Color.lerp(promoSoft, other?.promoSoft, t)!,
+      );
 }

@@ -22,10 +22,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) _goToMain();
     } catch (e) {
       if (mounted) {
+        final c = AppColors.of(context);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Anmeldung fehlgeschlagen: $e'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: AppColors.danger,
+          backgroundColor: c.danger,
         ));
       }
     } finally {
@@ -41,15 +42,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: c.bg,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             children: [
               const Spacer(flex: 2),
-              _buildHeader(),
+              _buildHeader(c),
               const Spacer(flex: 3),
               _buildButtons(),
               const SizedBox(height: 16),
@@ -62,35 +64,35 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AppColors c) {
     return Column(
       children: [
         Container(
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: AppColors.primarySoft,
+            color: c.primarySoft,
             borderRadius: BorderRadius.circular(24),
           ),
-          child: const Icon(Icons.shopping_basket_rounded,
-              size: 42, color: AppColors.primary),
+          child: Icon(Icons.shopping_basket_rounded,
+              size: 42, color: c.primary),
         ),
         const SizedBox(height: 24),
-        const Text(
+        Text(
           'Preisvergleich',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: c.textPrimary,
             fontSize: 30,
             fontWeight: FontWeight.w800,
             letterSpacing: -1,
           ),
         ),
         const SizedBox(height: 10),
-        const Text(
+        Text(
           'Finde die besten Preise\nbei allen Supermärkten.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AppColors.textSecondary,
+            color: c.textSecondary,
             fontSize: 16,
             height: 1.5,
           ),

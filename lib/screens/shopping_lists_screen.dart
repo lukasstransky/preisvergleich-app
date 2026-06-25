@@ -9,6 +9,7 @@ class ShoppingListsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = context.watch<AppState>();
+    final c = AppColors.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,18 +31,18 @@ class ShoppingListsScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                     side: isActive
-                        ? BorderSide(color: AppColors.primary, width: 2)
+                        ? BorderSide(color: c.primary, width: 2)
                         : BorderSide.none,
                   ),
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     leading: CircleAvatar(
                       backgroundColor: isActive
-                          ? AppColors.primary
-                          : AppColors.surfaceHigh,
+                          ? c.primary
+                          : c.surfaceHigh,
                       child: Icon(
                         Icons.shopping_cart,
-                        color: isActive ? AppColors.onPrimary : AppColors.textSecondary,
+                        color: isActive ? c.onPrimary : c.textSecondary,
                         size: 20,
                       ),
                     ),
@@ -53,7 +54,7 @@ class ShoppingListsScreen extends StatelessWidget {
                     ),
                     subtitle: Text(
                       '${list.itemCount} Artikel · €${list.total.toStringAsFixed(2)}',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      style: TextStyle(color: c.textSecondary, fontSize: 13),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -64,7 +65,7 @@ class ShoppingListsScreen extends StatelessWidget {
                         ),
                         if (appState.lists.length > 1)
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, size: 20, color: AppColors.danger),
+                            icon: Icon(Icons.delete_outline, size: 20, color: c.danger),
                             onPressed: () => _showDeleteConfirmation(context, appState, list.id, list.name),
                           ),
                       ],
@@ -157,24 +158,27 @@ class ShoppingListsScreen extends StatelessWidget {
   void _showDeleteConfirmation(BuildContext context, AppState appState, String id, String name) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Liste löschen?'),
-        content: Text('"$name" wird unwiderruflich gelöscht.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () {
-              appState.deleteList(id);
-              Navigator.pop(context);
-            },
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            child: const Text('Löschen'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        final c = AppColors.of(context);
+        return AlertDialog(
+          title: const Text('Liste löschen?'),
+          content: Text('"$name" wird unwiderruflich gelöscht.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Abbrechen'),
+            ),
+            TextButton(
+              onPressed: () {
+                appState.deleteList(id);
+                Navigator.pop(context);
+              },
+              style: TextButton.styleFrom(foregroundColor: c.danger),
+              child: const Text('Löschen'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

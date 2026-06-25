@@ -116,14 +116,13 @@ async function _handleKeywordAlert(doc, alert, index, batch, notifications) {
 
   if (result.hits.length === 0) return;
 
-  const productList = result.hits
-    .slice(0, 3)
-    .map(h => `${h.name} – €${Number(h.price).toFixed(2)} (${_capitalize(h.supermarket)})`)
-    .join('\n');
+  const best = result.hits[0];
+  const bestPrice = `€${Number(best.price).toFixed(2)} (${_capitalize(best.supermarket)})`;
+  const more = result.hits.length > 1 ? ` · +${result.hits.length - 1} weitere` : '';
 
   const body = alert.alertType === 'promotion'
-    ? `${result.hits.length} Angebote gefunden:\n${productList}`
-    : `${result.hits.length} Produkte unter €${Number(alert.targetPrice).toFixed(2)}:\n${productList}`;
+    ? `${result.hits.length} Angebote · ab ${bestPrice}${more}`
+    : `${result.hits.length} Produkte unter €${Number(alert.targetPrice).toFixed(2)} · ab ${bestPrice}${more}`;
 
   notifications.push(_buildNotification(
     alert.deviceToken,

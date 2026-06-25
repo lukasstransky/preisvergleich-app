@@ -11,18 +11,19 @@ class FilterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final appState = context.watch<AppState>();
     final hasCategories = appState.availableCategories.isNotEmpty;
 
     return ColoredBox(
-      color: AppColors.surface,
+      color: c.surface,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Row 1: Sort + Angebote
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
             child: Row(
               children: [
                 _SortChip(
@@ -42,13 +43,13 @@ class FilterSection extends StatelessWidget {
                   width: 1,
                   height: 16,
                   margin: const EdgeInsets.symmetric(horizontal: 10),
-                  color: AppColors.border,
+                  color: c.border,
                 ),
                 _ActionChip(
                   label: 'Angebote',
                   icon: Icons.local_offer_rounded,
                   active: appState.onlyPromotions,
-                  activeColor: AppColors.danger,
+                  activeColor: c.danger,
                   onTap: appState.toggleOnlyPromotions,
                 ),
               ],
@@ -91,7 +92,7 @@ class FilterSection extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -111,17 +112,16 @@ class _SortChip extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _primary = AppColors.primary;
-
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? _primary : AppColors.surfaceAlt,
+          color: selected ? c.primary : c.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -129,14 +129,14 @@ class _SortChip extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 13,
-                color: selected ? AppColors.onPrimary : AppColors.textSecondary),
+                color: selected ? c.onPrimary : c.textSecondary),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: selected ? AppColors.onPrimary : AppColors.textSecondary,
+                color: selected ? c.onPrimary : c.textSecondary,
                 letterSpacing: -0.1,
               ),
             ),
@@ -164,13 +164,14 @@ class _ActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? activeColor : AppColors.surfaceAlt,
+          color: active ? activeColor : c.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -178,14 +179,14 @@ class _ActionChip extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 13,
-                color: active ? AppColors.onPrimary : AppColors.textSecondary),
+                color: active ? c.onPrimary : c.textSecondary),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: active ? AppColors.onPrimary : AppColors.textSecondary,
+                color: active ? c.onPrimary : c.textSecondary,
                 letterSpacing: -0.1,
               ),
             ),
@@ -211,10 +212,9 @@ class _CategoryChip extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _primary = AppColors.primary;
-
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -222,14 +222,14 @@ class _CategoryChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: selected
-              ? _primary
+              ? c.primary
               : dominant
-                  ? _primary.withValues(alpha: 0.08)
-                  : AppColors.surfaceAlt,
+                  ? c.primary.withValues(alpha: 0.08)
+                  : c.surfaceAlt,
           borderRadius: BorderRadius.circular(20),
           border: dominant && !selected
               ? Border.all(
-                  color: _primary.withValues(alpha: 0.3), width: 1)
+                  color: c.primary.withValues(alpha: 0.3), width: 1)
               : null,
         ),
         child: Row(
@@ -237,7 +237,7 @@ class _CategoryChip extends StatelessWidget {
           children: [
             if (dominant && !selected) ...[
               Icon(Icons.trending_up_rounded,
-                  size: 12, color: _primary),
+                  size: 12, color: c.primary),
               const SizedBox(width: 4),
             ],
             Text(
@@ -246,10 +246,10 @@ class _CategoryChip extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: selected
-                    ? AppColors.onPrimary
+                    ? c.onPrimary
                     : dominant
-                        ? _primary
-                        : AppColors.textSecondary,
+                        ? c.primary
+                        : c.textSecondary,
                 letterSpacing: -0.1,
               ),
             ),
@@ -259,4 +259,3 @@ class _CategoryChip extends StatelessWidget {
     );
   }
 }
-

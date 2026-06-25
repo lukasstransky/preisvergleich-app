@@ -24,8 +24,6 @@ class PriceHistoryChart extends StatefulWidget {
 }
 
 class _PriceHistoryChartState extends State<PriceHistoryChart> {
-  static const _green = AppColors.primary;
-
   List<PriceHistoryEntry>? _history;
 
   @override
@@ -47,12 +45,14 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     if (_history == null) {
-      return const SizedBox(
+      return SizedBox(
         height: 100,
         child: Center(
           child: CircularProgressIndicator(
-              strokeWidth: 1.5, color: AppColors.primary),
+              strokeWidth: 1.5, color: c.primary),
         ),
       );
     }
@@ -86,15 +86,15 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Icon(Icons.show_chart_rounded, size: 16, color: _green),
-              SizedBox(width: 6),
+            children: [
+              Icon(Icons.show_chart_rounded, size: 16, color: c.primary),
+              const SizedBox(width: 6),
               Text(
                 'Preisverlauf',
                 style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary),
+                    color: c.textPrimary),
               ),
             ],
           ),
@@ -113,7 +113,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                     spots: spots,
                     isCurved: false,
                     isStepLineChart: true,
-                    color: _green,
+                    color: c.primary,
                     barWidth: 2,
                     dotData: FlDotData(
                       show: true,
@@ -121,14 +121,14 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                       getDotPainter: (spot, percent, barData, index) =>
                           FlDotCirclePainter(
                         radius: 5,
-                        color: _green,
+                        color: c.primary,
                         strokeWidth: 2,
-                        strokeColor: AppColors.surface,
+                        strokeColor: c.surface,
                       ),
                     ),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: _green.withValues(alpha: 0.08),
+                      color: c.primary.withValues(alpha: 0.08),
                     ),
                   ),
                 ],
@@ -151,7 +151,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                           child: Text(
                             '€${value.toStringAsFixed(2)}',
                             style: TextStyle(
-                                fontSize: 10, color: AppColors.textSecondary),
+                                fontSize: 10, color: c.textSecondary),
                             textAlign: TextAlign.right,
                           ),
                         );
@@ -177,7 +177,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                           child: Text(
                             '${parts[2]}.${parts[1]}.',
                             style: TextStyle(
-                                fontSize: 10, color: AppColors.textSecondary),
+                                fontSize: 10, color: c.textSecondary),
                           ),
                         );
                       },
@@ -189,7 +189,7 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
                   drawVerticalLine: false,
                   horizontalInterval: yInterval,
                   getDrawingHorizontalLine: (_) => FlLine(
-                    color: AppColors.border,
+                    color: c.border,
                     strokeWidth: 1,
                   ),
                 ),

@@ -57,6 +57,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final appState = context.watch<AppState>();
     final hasText = _controller.text.isNotEmpty;
 
@@ -67,23 +68,23 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.surfaceAlt,
+              color: c.surfaceAlt,
               borderRadius: BorderRadius.circular(50),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: c.border),
             ),
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
               textInputAction: TextInputAction.search,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: c.textPrimary,
                 fontSize: 15,
               ),
-              cursorColor: AppColors.primary,
+              cursorColor: c.primary,
               decoration: InputDecoration(
                 hintText: 'Lebensmittel suchen...',
-                hintStyle: const TextStyle(
-                  color: AppColors.textTertiary,
+                hintStyle: TextStyle(
+                  color: c.textTertiary,
                   fontWeight: FontWeight.w400,
                   fontSize: 15,
                 ),
@@ -94,8 +95,8 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                     child: Icon(
                       Icons.search_rounded,
                       color: hasText
-                          ? AppColors.primary
-                          : AppColors.textTertiary,
+                          ? c.primary
+                          : c.textTertiary,
                       size: 22,
                     ),
                   ),
@@ -109,19 +110,19 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                           child: Container(
                             width: 20,
                             height: 20,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surfaceHigh,
+                            decoration: BoxDecoration(
+                              color: c.surfaceHigh,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close,
-                                size: 13, color: AppColors.textSecondary),
+                            child: Icon(Icons.close,
+                                size: 13, color: c.textSecondary),
                           ),
                         ),
                       )
                     : null,
                 suffixIconConstraints: const BoxConstraints(minWidth: 48),
                 filled: true,
-                fillColor: AppColors.surfaceAlt,
+                fillColor: c.surfaceAlt,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(50),
                   borderSide: BorderSide.none,
@@ -148,18 +149,18 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           ),
         ),
         if (_showHistory && appState.searchHistory.isNotEmpty)
-          _buildHistoryPanel(context, appState),
+          _buildHistoryPanel(context, c, appState),
       ],
     );
   }
 
-  Widget _buildHistoryPanel(BuildContext context, AppState appState) {
+  Widget _buildHistoryPanel(BuildContext context, AppColors c, AppState appState) {
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 4),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: c.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: c.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +173,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 Text(
                   'Zuletzt gesucht',
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: c.textSecondary,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -187,7 +188,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                     minimumSize: Size.zero,
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    foregroundColor: AppColors.textSecondary,
+                    foregroundColor: c.textSecondary,
                   ),
                   child: const Text('Alle löschen',
                       style: TextStyle(fontSize: 12)),
@@ -203,21 +204,21 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                       horizontal: 16, vertical: 11),
                   child: Row(
                     children: [
-                      const Icon(Icons.history_rounded,
-                          size: 17, color: AppColors.textTertiary),
+                      Icon(Icons.history_rounded,
+                          size: 17, color: c.textTertiary),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(query,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary)),
+                                color: c.textPrimary)),
                       ),
                       GestureDetector(
                         onTap: () =>
                             appState.removeFromSearchHistory(query),
-                        child: const Icon(Icons.close,
-                            size: 15, color: AppColors.textTertiary),
+                        child: Icon(Icons.close,
+                            size: 15, color: c.textTertiary),
                       ),
                     ],
                   ),
