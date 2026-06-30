@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:preisvergleich_app/screens/shopping_list_screen.dart';
 import 'helpers/pump_app.dart';
-import 'helpers/test_data.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
