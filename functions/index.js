@@ -80,27 +80,29 @@ async function _handleProductAlert(doc, alert, index, batch, notifications) {
     return; // product no longer in index
   }
 
-  const triggered = _checkCondition(alert, product.price, product.inPromotion === true);
-  if (!triggered) return;
-  if (_recentlyTriggered(alert)) return;
+  const conditionNowMet = _checkCondition(alert, product.price, product.inPromotion === true);
+  const wasConditionMet = alert.conditionMet === true;
 
-  notifications.push(_buildNotification(
-    alert.deviceToken,
-    triggered.title,
-    triggered.body,
-    { productId: alert.productId, alertId: doc.id }
-  ));
-
-  batch.update(doc.ref, {
-    lastTriggered: FieldValue.serverTimestamp(),
-    currentPrice: product.price,
-  });
+  if (conditionNowMet && !wasConditionMet) {
+    // Condition newly became true → notify
+    notifications.push(_buildNotification(
+      alert.deviceToken,
+      conditionNowMet.title,
+      conditionNowMet.body,
+      { productId: alert.productId, alertId: doc.id }
+    ));
+    batch.update(doc.ref, {
+      conditionMet: true,
+      lastTriggered: FieldValue.serverTimestamp(),
+      currentPrice: product.price,
+    });
+  } else if (!conditionNowMet && wasConditionMet) {
+    // Condition no longer met → reset so next trigger fires again
+    batch.update(doc.ref, { conditionMet: false });
+  }
 }
 
 async function _handleKeywordAlert(doc, alert, index, batch, notifications) {
-  if (_recentlyTriggered(alert)) return;
-
-  // Build filter based on alert type
   let filters = '';
   if (alert.alertType === 'promotion') {
     filters = 'inPromotion:true';
@@ -119,24 +121,33 @@ async function _handleKeywordAlert(doc, alert, index, batch, notifications) {
     attributesToRetrieve: ['name', 'price', 'supermarket'],
   });
 
-  if (result.hits.length === 0) return;
+  const conditionNowMet = result.hits.length > 0;
+  const wasConditionMet = alert.conditionMet === true;
 
-  const best = result.hits[0];
-  const bestPrice = `€${Number(best.price).toFixed(2)} (${_capitalize(best.supermarket)})`;
-  const more = result.hits.length > 1 ? ` · +${result.hits.length - 1} weitere` : '';
+  if (conditionNowMet && !wasConditionMet) {
+    // Condition newly became true → notify
+    const best = result.hits[0];
+    const bestPrice = `€${Number(best.price).toFixed(2)} (${_capitalize(best.supermarket)})`;
+    const more = result.hits.length > 1 ? ` · +${result.hits.length - 1} weitere` : '';
 
-  const body = alert.alertType === 'promotion'
-    ? `${result.hits.length} Angebote · ab ${bestPrice}${more}`
-    : `${result.hits.length} Produkte unter €${Number(alert.targetPrice).toFixed(2)} · ab ${bestPrice}${more}`;
+    const body = alert.alertType === 'promotion'
+      ? `${result.hits.length} Angebote · ab ${bestPrice}${more}`
+      : `${result.hits.length} Produkte unter €${Number(alert.targetPrice).toFixed(2)} · ab ${bestPrice}${more}`;
 
-  notifications.push(_buildNotification(
-    alert.deviceToken,
-    `🔔 "${alert.keyword}" – Preisalarm`,
-    body,
-    { keyword: alert.keyword, alertId: doc.id }
-  ));
-
-  batch.update(doc.ref, { lastTriggered: FieldValue.serverTimestamp() });
+    notifications.push(_buildNotification(
+      alert.deviceToken,
+      `🔔 "${alert.keyword}" – Preisalarm`,
+      body,
+      { keyword: alert.keyword, alertId: doc.id }
+    ));
+    batch.update(doc.ref, {
+      conditionMet: true,
+      lastTriggered: FieldValue.serverTimestamp(),
+    });
+  } else if (!conditionNowMet && wasConditionMet) {
+    // No more matching results → reset
+    batch.update(doc.ref, { conditionMet: false });
+  }
 }
 
 function _checkCondition(alert, currentPrice, inPromotion) {
@@ -153,13 +164,6 @@ function _checkCondition(alert, currentPrice, inPromotion) {
     };
   }
   return null;
-}
-
-function _recentlyTriggered(alert) {
-  if (!alert.lastTriggered) return false;
-  const last = alert.lastTriggered.toDate();
-  const hoursSince = (Date.now() - last.getTime()) / (1000 * 60 * 60);
-  return hoursSince < 24;
 }
 
 function _buildNotification(token, title, body, data) {

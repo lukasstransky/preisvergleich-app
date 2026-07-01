@@ -17,6 +17,7 @@ class PriceAlert {
   final AlertScope scope;
   final String? keyword;
   final String? category;
+  final bool conditionMet;
 
   const PriceAlert({
     required this.id,
@@ -31,6 +32,7 @@ class PriceAlert {
     this.scope = AlertScope.product,
     this.keyword,
     this.category,
+    this.conditionMet = false,
   });
 
   bool get isKeywordAlert => scope == AlertScope.keyword;
@@ -61,6 +63,7 @@ class PriceAlert {
       scope: scopeStr == 'keyword' ? AlertScope.keyword : AlertScope.product,
       keyword: data['keyword'] as String?,
       category: data['category'] as String?,
+      conditionMet: data['conditionMet'] as bool? ?? false,
     );
   }
 
@@ -76,6 +79,7 @@ class PriceAlert {
         'createdAt': FieldValue.serverTimestamp(),
         'active': true,
         'lastTriggered': null,
+        'conditionMet': false,
         'scope': scope == AlertScope.keyword ? 'keyword' : 'product',
         'keyword': keyword,
         'category': category,
