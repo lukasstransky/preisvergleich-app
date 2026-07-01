@@ -53,11 +53,16 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap the edit / rename icon on the 'Zu umbenennen' list tile
-      // The rename action is typically an Icons.edit or accessible via long-press.
-      // Try the edit icon first; if not found fall back to long-press on the tile.
-      final editIconFinder = find.byIcon(Icons.edit_outlined);
+      final targetTile = find.ancestor(
+        of: find.text('Zu umbenennen'),
+        matching: find.byType(ListTile),
+      );
+      final editIconFinder = find.descendant(
+        of: targetTile,
+        matching: find.byIcon(Icons.edit_outlined),
+      );
       if (tester.any(editIconFinder)) {
-        await tester.tap(editIconFinder.first);
+        await tester.tap(editIconFinder);
       } else {
         await tester.longPress(find.text('Zu umbenennen'));
       }
@@ -100,7 +105,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap the delete icon on 'Liste B'
-      await tester.tap(find.byIcon(Icons.delete_outline).first);
+      final listBTile = find.ancestor(
+        of: find.text('Liste B'),
+        matching: find.byType(ListTile),
+      );
+      await tester.tap(find.descendant(
+        of: listBTile,
+        matching: find.byIcon(Icons.delete_outline),
+      ));
       await tester.pumpAndSettle();
 
       // Confirm deletion if a dialog appears
