@@ -31,8 +31,7 @@ class _MockAlgolia implements AlgoliaServiceBase {
     }
     final q = query.toLowerCase();
     var filtered = products.where((p) {
-      final matchesQuery = p.name.toLowerCase().contains(q) ||
-          (p.normalizedCategory?.toLowerCase().contains(q) ?? false);
+      final matchesQuery = p.name.toLowerCase().contains(q);
       final matchesSupermarket = supermarkets == null ||
           supermarkets.isEmpty ||
           supermarkets.contains(p.supermarket.toLowerCase());
@@ -177,6 +176,7 @@ Future<AppState> _makeState({
   bool throwOnSearch = false,
   List<PriceAlert>? initialAlerts,
 }) async {
+  SharedPreferences.resetStatic();
   SharedPreferences.setMockInitialValues({});
   final state = AppState(
     algoliaService: _MockAlgolia(
@@ -550,14 +550,14 @@ void main() {
 
     test('deleteList() removes list and activates another', () async {
       final state = await _makeState();
-      final firstId = state.activeList!.id;
+      await state.renameList(state.activeList!.id, 'Liste A');
       await state.createList('Liste B');
       final secondId = state.activeList!.id;
 
       await state.deleteList(secondId);
 
       expect(state.lists.length, 1);
-      expect(state.activeList?.id, firstId);
+      expect(state.activeList?.name, 'Liste A');
     });
 
     test('deleteList() recreates default list when deleting the last list',

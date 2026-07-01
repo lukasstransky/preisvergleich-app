@@ -35,8 +35,13 @@ class ShoppingListService {
 
   Future<ShoppingList> createList(String name) async {
     final lists = await getAllLists();
+    final existingIds = lists.map((l) => l.id).toSet();
+    var id = DateTime.now().millisecondsSinceEpoch.toString();
+    while (existingIds.contains(id)) {
+      id = (int.parse(id) + 1).toString();
+    }
     final newList = ShoppingList(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: id,
       name: name,
       items: [],
       createdAt: DateTime.now(),

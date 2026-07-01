@@ -340,11 +340,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: c.textSecondary, fontSize: 14, height: 1.5),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: appState.clearFilters,
-                child: const Text('Filter zurücksetzen'),
-              ),
             ],
           ),
         ),
