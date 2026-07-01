@@ -99,7 +99,7 @@ class AppState extends ChangeNotifier {
   List<ShoppingList> get lists => _lists;
   ShoppingList? get activeList => _activeList;
   List<ShoppingListItem> get shoppingListItems => _activeList?.items ?? [];
-  int get shoppingListItemCount => _activeList?.itemCount ?? 0;
+  int get shoppingListItemCount => _activeList?.distinctItemCount ?? 0;
   double get shoppingListTotal => _activeList?.total ?? 0;
 
   // Backward-compat: returns products in active list (used for badge)

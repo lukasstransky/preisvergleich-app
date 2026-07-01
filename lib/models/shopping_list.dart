@@ -21,7 +21,8 @@ class ShoppingList {
       );
 
   double get total => items.fold(0.0, (sum, item) => sum + item.totalPrice);
-  int get itemCount => items.length;
+  int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
+  int get distinctItemCount => items.length;
 
   factory ShoppingList.fromJson(Map<String, dynamic> json) => ShoppingList(
         id: json['id'] as String,
