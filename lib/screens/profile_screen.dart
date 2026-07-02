@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import '../providers/app_state.dart';
 import '../services/auth_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/paywall_sheet.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -56,6 +59,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.all(16),
             children: [
               _buildAccountCard(c, user, isAnonymous),
+              const SizedBox(height: 16),
+              _buildPremiumCard(c),
               const SizedBox(height: 24),
               if (isAnonymous) _buildSignInSection(c),
               if (!isAnonymous) _buildSignOutSection(c),
@@ -116,6 +121,98 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _handleRestore() async {
+    final appState = context.read<AppState>();
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _isLoading = true);
+    final ok = await appState.restorePremium();
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+    messenger.showSnackBar(SnackBar(
+      content: Text(ok ? 'Premium wiederhergestellt.' : 'Kein Kauf gefunden.'),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  Widget _buildPremiumCard(AppColors c) {
+    final appState = context.watch<AppState>();
+    // During the soft-launch phase (monetization off) there is nothing to sell,
+    // so the card only appears once monetization is live or the user is premium.
+    if (!appState.monetizationEnabled && !appState.isPremium) {
+      return const SizedBox.shrink();
+    }
+
+    if (appState.isPremium) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: c.primarySoft,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: c.primary.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.workspace_premium_rounded, color: c.primary),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text('Premium aktiv – danke für deine Unterstützung!',
+                  style: TextStyle(
+                      color: c.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => showPaywall(context),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [c.primary, const Color(0xFF177A50)],
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.workspace_premium_rounded, color: Colors.white),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Premium freischalten',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700)),
+                      SizedBox(height: 2),
+                      Text('Unbegrenzte Preisalarme, voller Verlauf, werbefrei.',
+                          style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+        TextButton(
+          onPressed: _isLoading ? null : _handleRestore,
+          child: Text('Kauf wiederherstellen',
+              style: TextStyle(color: c.textSecondary, fontSize: 13)),
+        ),
+      ],
     );
   }
 

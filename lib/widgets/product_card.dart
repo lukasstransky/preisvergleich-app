@@ -5,8 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/product.dart';
 import '../models/price_alert.dart';
 import '../providers/app_state.dart';
+import '../services/premium_service.dart';
 import '../theme/app_colors.dart';
 import 'price_history_chart.dart';
+import 'paywall_sheet.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -813,6 +815,7 @@ class _AlertDialogState extends State<_AlertDialog> {
             // Read AppState and ScaffoldMessenger BEFORE popping
             final appState = context.read<AppState>();
             final messenger = ScaffoldMessenger.of(context);
+            final navigator = Navigator.of(context);
             Navigator.pop(context);
             try {
               await appState.setPriceAlert(
@@ -826,6 +829,10 @@ class _AlertDialogState extends State<_AlertDialog> {
                     content: Text('Preisalarm gespeichert'),
                     behavior: SnackBarBehavior.floating,
                     duration: Duration(milliseconds: 2000)));
+            } on PremiumRequiredException catch (e) {
+              if (navigator.mounted) {
+                showPaywall(navigator.context, reason: e.message);
+              }
             } catch (e) {
               messenger
                 ..clearSnackBars()

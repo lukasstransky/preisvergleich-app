@@ -4,10 +4,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import '../models/price_alert.dart';
 import '../providers/app_state.dart';
+import '../services/premium_service.dart';
 import '../widgets/product_card.dart';
 import '../widgets/search_bar_widget.dart';
 import '../widgets/supermarket_filter.dart';
 import '../widgets/filter_section.dart';
+import '../widgets/paywall_sheet.dart';
 import '../theme/app_colors.dart';
 import 'price_alerts_screen.dart';
 
@@ -461,6 +463,7 @@ class _KeywordAlertDialogState extends State<_KeywordAlertDialog> {
           onPressed: () async {
             final appState = context.read<AppState>();
             final messenger = ScaffoldMessenger.of(context);
+            final navigator = Navigator.of(context);
             final category = _category;
             Navigator.pop(context);
             try {
@@ -476,6 +479,10 @@ class _KeywordAlertDialogState extends State<_KeywordAlertDialog> {
                   behavior: SnackBarBehavior.floating,
                   duration: Duration(milliseconds: 2000),
                 ));
+            } on PremiumRequiredException catch (e) {
+              if (navigator.mounted) {
+                showPaywall(navigator.context, reason: e.message);
+              }
             } catch (e) {
               messenger
                 ..clearSnackBars()

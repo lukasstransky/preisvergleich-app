@@ -67,3 +67,20 @@ Users are silently signed in anonymously on first launch (`main.dart`). No login
 ### Testing
 
 Unit tests use `FakeFirebaseFirestore` (from `fake_cloud_firestore`) and inject `authChanges: () => const Stream.empty()` and `getUid: () => 'test-uid'` into `AppState`. Integration tests use `pumpTestApp()` from `integration_test/helpers/pump_app.dart`, which wires up the same fakes. `MockAlgoliaService` and `MockPriceAlertService` live in `integration_test/helpers/`.
+
+**When to write which kind of test:**
+- New service method or `AppState` logic → unit test
+- New screen or significant UI change that touches navigation or cross-tab state → integration test via `pumpTestApp()`
+- Pure widget with no Firebase/state dependency → widget test is fine
+
+**`AuthService` uses lazy getters** (`FirebaseAuth get _auth => FirebaseAuth.instance`) intentionally. Do not convert them back to eager field initializers. `MainScreen` uses `IndexedStack` which mounts all tabs at once — an eager `FirebaseAuth.instance` in `AuthService` crashes integration tests because Firebase is not initialized in that environment.
+
+### Documentation
+
+The `docs/` folder contains feature-level documentation that cannot be derived from reading the code alone. When adding or changing a significant feature, update or create the relevant doc:
+
+- New analytics events → update `docs/analytics.md` (which events fire, when, what parameters)
+- Monetization changes → update `docs/monetization.md`
+- Any other cross-cutting feature (auth flow, push notifications, etc.) → create a matching `docs/<feature>.md`
+
+Document the **when** and **why**, not the what — the code already shows the what.

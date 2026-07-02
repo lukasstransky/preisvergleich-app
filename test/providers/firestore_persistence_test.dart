@@ -8,6 +8,7 @@ import 'package:preisvergleich_app/services/algolia_service.dart';
 import 'package:preisvergleich_app/services/price_alert_service.dart';
 import 'package:preisvergleich_app/services/shopping_list_service.dart';
 import 'package:preisvergleich_app/services/favorites_service.dart';
+import 'package:preisvergleich_app/services/analytics_service.dart';
 
 class _NoOpAlgolia implements AlgoliaServiceBase {
   @override
@@ -42,6 +43,7 @@ AppState _makeState(FakeFirebaseFirestore firestore, String uid) {
     priceAlertService: _NoOpAlerts(),
     shoppingListService: ShoppingListService(firestore: firestore, getUid: () => uid),
     favoritesService: FavoritesService(firestore: firestore, getUid: () => uid),
+    analytics: const NoOpAnalyticsService(),
     authChanges: () => const Stream.empty(),
     getUid: () => uid,
   );

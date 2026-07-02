@@ -51,8 +51,15 @@ dependencies:
   
   # Auth
   firebase_auth: ^5.5.0
+  firebase_analytics: ^11.3.0
   google_sign_in: ^6.2.2
   sign_in_with_apple: ^6.1.3
+
+  # In-App-Käufe / Abo (Monetarisierung) — beim RevenueCat-Setup aktivieren:
+  #   flutter pub add purchases_flutter
+  # Danach die TODO(revenuecat)-Stellen in lib/services/premium_service.dart
+  # und lib/main.dart ausfüllen. Siehe docs/monetization.md.
+  # purchases_flutter: ^8.0.0
 
   # Algolia Search
   algolia_helper_flutter: ^1.0.0

@@ -7,6 +7,21 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
+    // Premium entitlement: readable by its owner, but only writable by the
+    // server (RevenueCat webhook via Admin SDK, which bypasses these rules).
+    // Keeping it in a separate top-level collection means the users/** wildcard
+    // above cannot grant clients write access to their own entitlement.
+    match /entitlements/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Monetization config: read-only for clients, server-managed.
+    match /config/{doc} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
     // Price alerts: strict for new alerts (userId required), lenient for legacy (no userId)
     match /price_alerts/{alertId} {
       allow create: if request.auth != null

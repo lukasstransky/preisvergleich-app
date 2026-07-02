@@ -10,6 +10,8 @@ import '../services/shopping_list_service.dart';
 import '../services/search_history_service.dart';
 import '../services/price_alert_service.dart';
 import '../services/favorites_service.dart';
+import '../services/premium_service.dart';
+import '../services/analytics_service.dart';
 
 class AppState extends ChangeNotifier {
   final AlgoliaServiceBase _algoliaService;
@@ -17,9 +19,12 @@ class AppState extends ChangeNotifier {
   final SearchHistoryService _searchHistoryService;
   final PriceAlertServiceBase _priceAlertService;
   final FavoritesService _favoritesService;
+  final PremiumServiceBase _premiumService;
+  final AnalyticsServiceBase _analytics;
 
   String? _initializedForUid;
   StreamSubscription<User?>? _authSubscription;
+  StreamSubscription<bool>? _premiumSubscription;
   final String? Function() _getUid;
 
   AppState({
@@ -28,6 +33,8 @@ class AppState extends ChangeNotifier {
     SearchHistoryService? searchHistoryService,
     PriceAlertServiceBase? priceAlertService,
     FavoritesService? favoritesService,
+    PremiumServiceBase? premiumService,
+    AnalyticsServiceBase? analytics,
     Stream<User?> Function()? authChanges,
     String? Function()? getUid,
   })  : _algoliaService = algoliaService ?? AlgoliaService(),
@@ -35,6 +42,8 @@ class AppState extends ChangeNotifier {
         _searchHistoryService = searchHistoryService ?? SearchHistoryService(),
         _priceAlertService = priceAlertService ?? PriceAlertService(),
         _favoritesService = favoritesService ?? FavoritesService(),
+        _premiumService = premiumService ?? const DisabledPremiumService(),
+        _analytics = analytics ?? AnalyticsService(),
         _getUid = getUid ?? (() => FirebaseAuth.instance.currentUser?.uid) {
     final stream = authChanges != null
         ? authChanges()
@@ -69,6 +78,10 @@ class AppState extends ChangeNotifier {
 
   // Favorites
   List<Product> _favorites = [];
+
+  // Premium / monetization
+  bool _isPremium = false;
+  PremiumConfig _premiumConfig = PremiumConfig.defaults;
 
   // Search getters
   List<Product> get searchResults => _searchResults;
@@ -106,6 +119,41 @@ class AppState extends ChangeNotifier {
   List<Product> get favorites => _favorites;
   bool isFavorite(String productId) => _favorites.any((p) => p.id == productId);
 
+  // Premium getters
+  bool get isPremium => _isPremium;
+  PremiumConfig get premiumConfig => _premiumConfig;
+
+  /// Whether monetization gating is live at all. While this is false (soft
+  /// launch) every feature stays unlimited and free.
+  bool get monetizationEnabled => _premiumConfig.monetizationEnabled;
+
+  int get activeAlertCount => _priceAlerts.length;
+  int get freeAlertLimit => _premiumConfig.freeAlertLimit;
+
+  /// True if the user may create another price alert under the current tier.
+  bool get canCreateAlert =>
+      _isPremium ||
+      !_premiumConfig.monetizationEnabled ||
+      _priceAlerts.length < _premiumConfig.freeAlertLimit;
+
+  /// Number of days of price history the current tier may view. Premium (and
+  /// the soft-launch phase) get the full history, signalled by `null`.
+  int? get priceHistoryVisibleDays =>
+      (_isPremium || !_premiumConfig.monetizationEnabled)
+          ? null
+          : _premiumConfig.priceHistoryFreeDays;
+
+  /// Throws [PremiumRequiredException] when the free-tier alert limit is hit.
+  void _ensureCanCreateAlert() {
+    if (canCreateAlert) return;
+    unawaited(_analytics.logPaywallShown('alerts'));
+    throw PremiumRequiredException(
+      'alerts',
+      'Mit der Gratis-Version kannst du bis zu ${_premiumConfig.freeAlertLimit} '
+          'Preisalarme anlegen. Mit Premium sind sie unbegrenzt.',
+    );
+  }
+
   // Price alert getters
   List<PriceAlert> get priceAlerts => _priceAlerts;
   bool hasAlert(String productId) => _alertsByProductId.containsKey(productId);
@@ -131,9 +179,45 @@ class AppState extends ChangeNotifier {
     final uid = _getUid();
     if (uid == null) return;
     _initializedForUid = uid;
+
+    // Load monetization config + entitlement, and keep entitlement live so a
+    // purchase reflected server-side unlocks premium without an app restart.
+    _premiumConfig = await _premiumService.loadConfig();
+    _premiumSubscription?.cancel();
+    _premiumSubscription = _premiumService.entitlementChanges().listen((premium) {
+      if (_isPremium != premium) {
+        if (!_isPremium && premium) unawaited(_analytics.logPremiumPurchased());
+        _isPremium = premium;
+        notifyListeners();
+      }
+    });
+    _isPremium = await _premiumService.loadEntitlement();
+
     // _loadPriceAlerts() requests notification permission itself (via
     // getDeviceToken), so no separate requestPermission() call is needed here.
     await Future.wait([_loadLists(), _loadSearchHistory(), _loadPriceAlerts(), _loadFavorites()]);
+    notifyListeners();
+  }
+
+  // ── Premium ──────────────────────────────────────────────────────────────
+
+  /// Starts the purchase flow. Returns true if the user is premium afterwards.
+  Future<bool> startPremiumPurchase() async {
+    final ok = await _premiumService.startPurchase();
+    if (ok && !_isPremium) {
+      _isPremium = true;
+      notifyListeners();
+    }
+    return ok;
+  }
+
+  Future<bool> restorePremium() async {
+    final ok = await _premiumService.restorePurchases();
+    if (ok != _isPremium) {
+      _isPremium = ok;
+      notifyListeners();
+    }
+    return ok;
   }
 
   // ── Search ──────────────────────────────────────────────────────────────
@@ -166,6 +250,7 @@ class AppState extends ChangeNotifier {
       _error = null;
       await _searchHistoryService.addSearch(query.trim());
       _searchHistory = await _searchHistoryService.getHistory();
+      unawaited(_analytics.logSearch(query.trim()));
     } catch (e) {
       _error = 'Fehler bei der Suche: $e';
       _searchResults = [];
@@ -283,7 +368,21 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// True if the user may create another shopping list under the current tier.
+  bool get canCreateList =>
+      _isPremium ||
+      !_premiumConfig.monetizationEnabled ||
+      _lists.length < _premiumConfig.freeListLimit;
+
   Future<void> createList(String name) async {
+    if (!canCreateList) {
+      throw PremiumRequiredException(
+        'lists',
+        'Mit der Gratis-Version kannst du ${_premiumConfig.freeListLimit} '
+            'Einkaufsliste${_premiumConfig.freeListLimit == 1 ? '' : 'n'} '
+            'führen. Mit Premium sind sie unbegrenzt.',
+      );
+    }
     final newList = await _shoppingListService.createList(name);
     _lists = await _shoppingListService.getAllLists();
     _activeList = newList;
@@ -334,6 +433,7 @@ class AppState extends ChangeNotifier {
       items[idx] = items[idx].copyWith(quantity: items[idx].quantity + 1);
     } else {
       items.add(ShoppingListItem(product: product));
+      unawaited(_analytics.logAddToShoppingList(product.id, product.supermarket));
     }
     _activeList = _activeList!.copyWith(items: items);
     await _saveActiveList();
@@ -405,11 +505,13 @@ class AppState extends ChangeNotifier {
     required AlertType alertType,
     double? targetPrice,
   }) async {
+    _ensureCanCreateAlert();
     await _priceAlertService.createAlert(
       product: product,
       alertType: alertType,
       targetPrice: targetPrice,
     );
+    unawaited(_analytics.logPriceAlertCreated('product'));
     await _loadPriceAlerts();
   }
 
@@ -419,12 +521,14 @@ class AppState extends ChangeNotifier {
     double? targetPrice,
     String? category,
   }) async {
+    _ensureCanCreateAlert();
     await _priceAlertService.createKeywordAlert(
       keyword: keyword,
       alertType: alertType,
       targetPrice: targetPrice,
       category: category,
     );
+    unawaited(_analytics.logPriceAlertCreated('keyword'));
     await _loadPriceAlerts();
   }
 
@@ -452,8 +556,10 @@ class AppState extends ChangeNotifier {
   Future<void> toggleFavorite(Product product) async {
     if (isFavorite(product.id)) {
       _favorites.removeWhere((p) => p.id == product.id);
+      unawaited(_analytics.logRemoveFromFavorites(product.id));
     } else {
       _favorites.add(product);
+      unawaited(_analytics.logAddToFavorites(product.id, product.supermarket));
     }
     await _favoritesService.saveFavorites(_favorites);
     notifyListeners();
@@ -462,6 +568,8 @@ class AppState extends ChangeNotifier {
   @override
   void dispose() {
     _authSubscription?.cancel();
+    _premiumSubscription?.cancel();
+    _premiumService.dispose();
     _algoliaService.dispose();
     super.dispose();
   }

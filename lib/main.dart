@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'providers/app_state.dart';
+import 'services/premium_service.dart';
 import 'screens/main_screen.dart';
 import 'theme/app_colors.dart';
 
@@ -21,6 +22,10 @@ void main() async {
   if (FirebaseAuth.instance.currentUser == null) {
     await FirebaseAuth.instance.signInAnonymously();
   }
+  // TODO(revenuecat): initialise the purchase SDK once API keys are set, e.g.
+  //   await Purchases.configure(PurchasesConfiguration(revenueCatPublicKey));
+  // Entitlement itself is read from Firestore (`entitlements/{uid}`), which the
+  // RevenueCat webhook keeps in sync — see docs/monetization.md.
   runApp(const MyApp());
 }
 
@@ -156,7 +161,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AppState(),
+      create: (_) => AppState(premiumService: PremiumService()),
       child: MaterialApp(
         title: 'Preisvergleich',
         debugShowCheckedModeBanner: false,

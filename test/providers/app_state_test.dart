@@ -8,6 +8,8 @@ import 'package:preisvergleich_app/services/algolia_service.dart';
 import 'package:preisvergleich_app/services/price_alert_service.dart';
 import 'package:preisvergleich_app/services/shopping_list_service.dart';
 import 'package:preisvergleich_app/services/favorites_service.dart';
+import 'package:preisvergleich_app/services/premium_service.dart';
+import 'package:preisvergleich_app/services/analytics_service.dart';
 
 // ── Inline mocks ──────────────────────────────────────────────────────────────
 
@@ -114,6 +116,26 @@ class _MockAlerts implements PriceAlertServiceBase {
       _alerts.removeWhere((a) => a.id == id);
 }
 
+class _FakePremium implements PremiumServiceBase {
+  final PremiumConfig config;
+  bool premium;
+  _FakePremium({PremiumConfig? config, this.premium = false})
+      : config = config ?? PremiumConfig.defaults;
+
+  @override
+  Future<PremiumConfig> loadConfig() async => config;
+  @override
+  Future<bool> loadEntitlement() async => premium;
+  @override
+  Stream<bool> entitlementChanges() => const Stream<bool>.empty();
+  @override
+  Future<bool> startPurchase() async => premium = true;
+  @override
+  Future<bool> restorePurchases() async => premium;
+  @override
+  void dispose() {}
+}
+
 // ── Test data ─────────────────────────────────────────────────────────────────
 
 final _p1 = Product(
@@ -179,6 +201,7 @@ Future<AppState> _makeState({
   bool throwOnSearch = false,
   List<PriceAlert>? initialAlerts,
   FakeFirebaseFirestore? firestore,
+  PremiumServiceBase? premiumService,
 }) async {
   SharedPreferences.resetStatic();
   SharedPreferences.setMockInitialValues({});
@@ -191,6 +214,8 @@ Future<AppState> _makeState({
     priceAlertService: _MockAlerts(initialAlerts),
     shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
     favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+    premiumService: premiumService,
+    analytics: const NoOpAnalyticsService(),
     authChanges: () => const Stream.empty(),
     getUid: () => 'test-uid',
   );
@@ -313,6 +338,7 @@ void main() {
         priceAlertService: _MockAlerts(),
         shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
         favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        analytics: const NoOpAnalyticsService(),
         authChanges: () => const Stream.empty(),
         getUid: () => 'test-uid',
       );
@@ -336,6 +362,7 @@ void main() {
         priceAlertService: _MockAlerts(),
         shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
         favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        analytics: const NoOpAnalyticsService(),
         authChanges: () => const Stream.empty(),
         getUid: () => 'test-uid',
       );
@@ -627,6 +654,7 @@ void main() {
         priceAlertService: _MockAlerts(),
         shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
         favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        analytics: const NoOpAnalyticsService(),
         authChanges: () => const Stream.empty(),
         getUid: () => 'test-uid',
       );
@@ -638,6 +666,7 @@ void main() {
         priceAlertService: _MockAlerts(),
         shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
         favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        analytics: const NoOpAnalyticsService(),
         authChanges: () => const Stream.empty(),
         getUid: () => 'test-uid',
       );
@@ -734,6 +763,75 @@ void main() {
 
       final state = await _makeState(initialAlerts: preSeeded);
 
+      expect(state.priceAlerts.length, 2);
+    });
+  });
+
+  // ── Freemium gating ─────────────────────────────────────────────────────────
+
+  group('freemium gating', () {
+    test('monetization disabled: alerts stay unlimited', () async {
+      final state = await _makeState(
+        premiumService: _FakePremium(
+          config: const PremiumConfig(monetizationEnabled: false, freeAlertLimit: 1),
+        ),
+      );
+
+      await state.setKeywordAlert(keyword: 'milch', alertType: AlertType.promotion);
+      await state.setKeywordAlert(keyword: 'butter', alertType: AlertType.promotion);
+
+      expect(state.priceAlerts.length, 2);
+      expect(state.canCreateAlert, isTrue);
+    });
+
+    test('free tier blocks alert creation past the limit', () async {
+      final state = await _makeState(
+        premiumService: _FakePremium(
+          config: const PremiumConfig(monetizationEnabled: true, freeAlertLimit: 2),
+        ),
+      );
+
+      await state.setKeywordAlert(keyword: 'milch', alertType: AlertType.promotion);
+      await state.setKeywordAlert(keyword: 'butter', alertType: AlertType.promotion);
+
+      expect(state.canCreateAlert, isFalse);
+      expect(
+        () => state.setKeywordAlert(keyword: 'brot', alertType: AlertType.promotion),
+        throwsA(isA<PremiumRequiredException>()),
+      );
+      expect(state.priceAlerts.length, 2);
+    });
+
+    test('premium user bypasses the limit', () async {
+      final state = await _makeState(
+        premiumService: _FakePremium(
+          config: const PremiumConfig(monetizationEnabled: true, freeAlertLimit: 1),
+          premium: true,
+        ),
+      );
+
+      await state.setKeywordAlert(keyword: 'milch', alertType: AlertType.promotion);
+      await state.setKeywordAlert(keyword: 'butter', alertType: AlertType.promotion);
+
+      expect(state.isPremium, isTrue);
+      expect(state.priceAlerts.length, 2);
+    });
+
+    test('startPremiumPurchase unlocks and lifts the limit', () async {
+      final premium = _FakePremium(
+        config: const PremiumConfig(monetizationEnabled: true, freeAlertLimit: 1),
+      );
+      final state = await _makeState(premiumService: premium);
+
+      await state.setKeywordAlert(keyword: 'milch', alertType: AlertType.promotion);
+      expect(state.canCreateAlert, isFalse);
+
+      final ok = await state.startPremiumPurchase();
+
+      expect(ok, isTrue);
+      expect(state.isPremium, isTrue);
+      expect(state.canCreateAlert, isTrue);
+      await state.setKeywordAlert(keyword: 'butter', alertType: AlertType.promotion);
       expect(state.priceAlerts.length, 2);
     });
   });

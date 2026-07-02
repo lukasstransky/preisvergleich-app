@@ -34,11 +34,16 @@ exports.checkPriceAlerts = onSchedule(
 
     if (alertsSnapshot.empty) return;
 
+    // Enforce the free-tier alert limit server-side so a modified client cannot
+    // create unlimited alerts and drive up Algolia/FCM cost. Non-premium users
+    // only ever get their N most recent alerts evaluated.
+    const eligibleDocs = await _applyTierLimits(alertsSnapshot.docs);
+
     const messaging = getMessaging();
     const batch = db.batch();
     const notifications = [];
 
-    for (const doc of alertsSnapshot.docs) {
+    for (const doc of eligibleDocs) {
       const alert = doc.data();
       const isKeywordAlert = alert.scope === 'keyword';
 
@@ -69,6 +74,61 @@ exports.checkPriceAlerts = onSchedule(
     console.log(`Alert check complete. Triggered ${notifications.length} notifications.`);
   }
 );
+
+/**
+ * Filters the active alerts down to the ones that should actually be evaluated,
+ * enforcing the free-tier limit for non-premium users.
+ *
+ * - While monetization is disabled (soft launch) every alert is eligible.
+ * - Legacy alerts without a `userId` are grandfathered in (always eligible).
+ * - Otherwise, for each user we look up `entitlements/{uid}`; premium users are
+ *   unlimited, everyone else keeps only their `freeAlertLimit` most recent alerts.
+ */
+async function _applyTierLimits(docs, database = db) {
+  const configSnap = await database.collection('config').doc('monetization').get();
+  const config = configSnap.exists ? configSnap.data() : {};
+  if (config.monetizationEnabled !== true) return docs;
+  const freeAlertLimit =
+    typeof config.freeAlertLimit === 'number' ? config.freeAlertLimit : 3;
+
+  const byUser = new Map();
+  const eligible = [];
+  for (const doc of docs) {
+    const uid = doc.data().userId;
+    if (!uid) {
+      eligible.push(doc); // legacy alert, grandfathered
+      continue;
+    }
+    if (!byUser.has(uid)) byUser.set(uid, []);
+    byUser.get(uid).push(doc);
+  }
+
+  for (const [uid, userDocs] of byUser) {
+    let premium = false;
+    try {
+      const ent = await database.collection('entitlements').doc(uid).get();
+      const data = ent.exists ? ent.data() : null;
+      premium = data?.active === true &&
+        (!data.expiresAt || data.expiresAt.toDate() > new Date());
+    } catch (e) {
+      console.error(`entitlement lookup failed for ${uid}: ${e.message}`);
+    }
+
+    if (premium) {
+      eligible.push(...userDocs);
+      continue;
+    }
+    // Keep the most recently created alerts up to the free limit.
+    userDocs.sort((a, b) => {
+      const ta = a.data().createdAt?.toMillis?.() ?? 0;
+      const tb = b.data().createdAt?.toMillis?.() ?? 0;
+      return tb - ta;
+    });
+    eligible.push(...userDocs.slice(0, freeAlertLimit));
+  }
+
+  return eligible;
+}
 
 async function _handleProductAlert(doc, alert, index, batch, notifications) {
   let product;
@@ -178,3 +238,6 @@ function _buildNotification(token, title, body, data) {
 function _capitalize(str) {
   return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
 }
+
+// Exported for unit testing (see functions/test/tier_limits.test.js).
+exports._applyTierLimits = _applyTierLimits;

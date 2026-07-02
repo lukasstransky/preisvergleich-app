@@ -3,15 +3,21 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  FirebaseAuth get _auth => FirebaseAuth.instance;
+  GoogleSignIn get _googleSignIn => GoogleSignIn();
 
   User? get currentUser => _auth.currentUser;
   bool get isLoggedIn => currentUser != null && !currentUser!.isAnonymous;
   bool get isAnonymous => currentUser?.isAnonymous ?? false;
   bool get hasUser => currentUser != null;
 
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
+  Stream<User?> get authStateChanges {
+    try {
+      return _auth.authStateChanges();
+    } catch (_) {
+      return const Stream.empty();
+    }
+  }
 
   Future<User?> signInWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
