@@ -1,3 +1,4 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preisvergleich_app/providers/app_state.dart';
@@ -5,6 +6,8 @@ import 'package:preisvergleich_app/models/product.dart';
 import 'package:preisvergleich_app/models/price_alert.dart';
 import 'package:preisvergleich_app/services/algolia_service.dart';
 import 'package:preisvergleich_app/services/price_alert_service.dart';
+import 'package:preisvergleich_app/services/shopping_list_service.dart';
+import 'package:preisvergleich_app/services/favorites_service.dart';
 
 // ── Inline mocks ──────────────────────────────────────────────────────────────
 
@@ -175,15 +178,21 @@ Future<AppState> _makeState({
   List<Product>? products,
   bool throwOnSearch = false,
   List<PriceAlert>? initialAlerts,
+  FakeFirebaseFirestore? firestore,
 }) async {
   SharedPreferences.resetStatic();
   SharedPreferences.setMockInitialValues({});
+  final fs = firestore ?? FakeFirebaseFirestore();
   final state = AppState(
     algoliaService: _MockAlgolia(
       products ?? _allProducts,
       throwOnSearch: throwOnSearch,
     ),
     priceAlertService: _MockAlerts(initialAlerts),
+    shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
+    favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+    authChanges: () => const Stream.empty(),
+    getUid: () => 'test-uid',
   );
   await state.initialize();
   return state;
@@ -297,10 +306,15 @@ void main() {
     test('setSortOrder() does not re-trigger search when order is unchanged',
         () async {
       final algolia = _MockAlgolia(_allProducts);
+      final fs = FakeFirebaseFirestore();
       SharedPreferences.setMockInitialValues({});
       final state = AppState(
         algoliaService: algolia,
         priceAlertService: _MockAlerts(),
+        shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
+        favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        authChanges: () => const Stream.empty(),
+        getUid: () => 'test-uid',
       );
       await state.initialize();
 
@@ -315,10 +329,15 @@ void main() {
 
     test('setSortOrder() triggers re-search when order changes', () async {
       final algolia = _MockAlgolia(_allProducts);
+      final fs = FakeFirebaseFirestore();
       SharedPreferences.setMockInitialValues({});
       final state = AppState(
         algoliaService: algolia,
         priceAlertService: _MockAlerts(),
+        shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
+        favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        authChanges: () => const Stream.empty(),
+        getUid: () => 'test-uid',
       );
       await state.initialize();
 
@@ -601,11 +620,15 @@ void main() {
     });
 
     test('favorites persists across re-initialization', () async {
-      // Both states share the same SharedPreferences mock values
       SharedPreferences.setMockInitialValues({});
+      final fs = FakeFirebaseFirestore();
       final state1 = AppState(
         algoliaService: _MockAlgolia(_allProducts),
         priceAlertService: _MockAlerts(),
+        shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
+        favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        authChanges: () => const Stream.empty(),
+        getUid: () => 'test-uid',
       );
       await state1.initialize();
       await state1.toggleFavorite(_p1);
@@ -613,6 +636,10 @@ void main() {
       final state2 = AppState(
         algoliaService: _MockAlgolia(_allProducts),
         priceAlertService: _MockAlerts(),
+        shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
+        favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+        authChanges: () => const Stream.empty(),
+        getUid: () => 'test-uid',
       );
       await state2.initialize();
 

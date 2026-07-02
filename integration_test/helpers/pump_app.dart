@@ -1,3 +1,4 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -5,7 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preisvergleich_app/providers/app_state.dart';
 import 'package:preisvergleich_app/screens/main_screen.dart';
 import 'package:preisvergleich_app/services/algolia_service.dart';
+import 'package:preisvergleich_app/services/favorites_service.dart';
 import 'package:preisvergleich_app/services/price_alert_service.dart';
+import 'package:preisvergleich_app/services/shopping_list_service.dart';
 import 'package:preisvergleich_app/widgets/search_bar_widget.dart';
 import 'mock_algolia_service.dart';
 import 'mock_price_alert_service.dart';
@@ -14,12 +17,18 @@ Future<AppState> pumpTestApp(
   WidgetTester tester, {
   AlgoliaServiceBase? algoliaService,
   PriceAlertServiceBase? priceAlertService,
+  FakeFirebaseFirestore? firestore,
 }) async {
   SharedPreferences.setMockInitialValues({});
 
+  final fs = firestore ?? FakeFirebaseFirestore();
   final appState = AppState(
     algoliaService: algoliaService ?? MockAlgoliaService(),
     priceAlertService: priceAlertService ?? MockPriceAlertService(),
+    shoppingListService: ShoppingListService(firestore: fs, getUid: () => 'test-uid'),
+    favoritesService: FavoritesService(firestore: fs, getUid: () => 'test-uid'),
+    authChanges: () => const Stream.empty(),
+    getUid: () => 'test-uid',
   );
   await appState.initialize();
 

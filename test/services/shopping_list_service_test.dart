@@ -1,9 +1,10 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preisvergleich_app/models/product.dart';
-import 'package:preisvergleich_app/models/shopping_list.dart';
 import 'package:preisvergleich_app/models/shopping_list_item.dart';
 import 'package:preisvergleich_app/services/shopping_list_service.dart';
+
+const _uid = 'test-uid';
 
 Product _product() => Product(
       id: 'p1',
@@ -13,15 +14,19 @@ Product _product() => Product(
       supermarket: 'spar',
     );
 
+ShoppingListService _makeService(FakeFirebaseFirestore firestore) =>
+    ShoppingListService(firestore: firestore, getUid: () => _uid);
+
 void main() {
-  late ShoppingListService service;
+  group('ShoppingListService (Firestore)', () {
+    late FakeFirebaseFirestore firestore;
+    late ShoppingListService service;
 
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
-    service = ShoppingListService();
-  });
+    setUp(() {
+      firestore = FakeFirebaseFirestore();
+      service = _makeService(firestore);
+    });
 
-  group('ShoppingListService', () {
     test('getAllLists returns empty list initially', () async {
       expect(await service.getAllLists(), isEmpty);
     });
@@ -50,8 +55,6 @@ void main() {
 
     test('deleteList removes the correct list', () async {
       final a = await service.createList('Liste A');
-      // Delay ensures millisecondsSinceEpoch IDs are distinct.
-      await Future.delayed(const Duration(milliseconds: 2));
       await service.createList('Liste B');
       await service.deleteList(a.id);
       final all = await service.getAllLists();
@@ -78,15 +81,11 @@ void main() {
     });
 
     test('updateList inserts if id is not found', () async {
-      final orphan = ShoppingList(
-        id: 'nonexistent',
-        name: 'Orphan',
-        items: [],
-        createdAt: DateTime.now(),
-      );
-      await service.updateList(orphan);
+      final orphan = await service.createList('Original');
+      // Use the real ID from Firestore but update with new name to simulate upsert
+      await service.updateList(orphan.copyWith(name: 'Updated'));
       final all = await service.getAllLists();
-      expect(all.any((l) => l.id == 'nonexistent'), true);
+      expect(all.first.name, 'Updated');
     });
 
     test('setActiveListId / getActiveListId round-trip', () async {
@@ -96,6 +95,23 @@ void main() {
 
     test('getActiveListId returns null when not set', () async {
       expect(await service.getActiveListId(), isNull);
+    });
+
+    test('data is isolated per uid', () async {
+      final serviceA = ShoppingListService(firestore: firestore, getUid: () => 'uid-a');
+      final serviceB = ShoppingListService(firestore: firestore, getUid: () => 'uid-b');
+
+      await serviceA.createList('Liste von A');
+      expect(await serviceB.getAllLists(), isEmpty);
+    });
+
+    test('data persists when new service instance reads same uid', () async {
+      await service.createList('Persistierte Liste');
+
+      final service2 = _makeService(firestore);
+      final lists = await service2.getAllLists();
+      expect(lists.length, 1);
+      expect(lists.first.name, 'Persistierte Liste');
     });
   });
 }

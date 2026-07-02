@@ -1,71 +1,64 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/shopping_list.dart';
 
 class ShoppingListService {
-  static const String _listsKey = 'shopping_lists_v2';
-  static const String _activeListIdKey = 'active_list_id';
+  final FirebaseFirestore _firestore;
+  final String Function() _getUid;
+
+  ShoppingListService({
+    FirebaseFirestore? firestore,
+    String Function()? getUid,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _getUid = getUid ?? (() => FirebaseAuth.instance.currentUser!.uid);
+
+  String get _uid => _getUid();
+
+  CollectionReference get _listsRef =>
+      _firestore.collection('users').doc(_uid).collection('shopping_lists');
+
+  DocumentReference get _settingsRef =>
+      _firestore.collection('users').doc(_uid).collection('settings').doc('data');
 
   Future<List<ShoppingList>> getAllLists() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_listsKey);
-    if (jsonString == null || jsonString.isEmpty) return [];
-    try {
-      final List<dynamic> jsonList = json.decode(jsonString);
-      return jsonList.map((e) => ShoppingList.fromJson(e as Map<String, dynamic>)).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  Future<void> saveLists(List<ShoppingList> lists) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_listsKey, json.encode(lists.map((e) => e.toJson()).toList()));
+    final snapshot = await _listsRef.orderBy('createdAt').get();
+    return snapshot.docs.map((doc) {
+      final data = Map<String, dynamic>.from(doc.data() as Map);
+      data['id'] = doc.id;
+      return ShoppingList.fromJson(data);
+    }).toList();
   }
 
   Future<String?> getActiveListId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_activeListIdKey);
+    final doc = await _settingsRef.get();
+    if (!doc.exists) return null;
+    return (doc.data() as Map<String, dynamic>?)?['activeListId'] as String?;
   }
 
   Future<void> setActiveListId(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_activeListIdKey, id);
+    await _settingsRef.set({'activeListId': id}, SetOptions(merge: true));
   }
 
   Future<ShoppingList> createList(String name) async {
-    final lists = await getAllLists();
-    final existingIds = lists.map((l) => l.id).toSet();
-    var id = DateTime.now().millisecondsSinceEpoch.toString();
-    while (existingIds.contains(id)) {
-      id = (int.parse(id) + 1).toString();
-    }
+    final docRef = _listsRef.doc();
     final newList = ShoppingList(
-      id: id,
+      id: docRef.id,
       name: name,
       items: [],
       createdAt: DateTime.now(),
     );
-    lists.add(newList);
-    await saveLists(lists);
-    await setActiveListId(newList.id);
+    final data = newList.toJson()..remove('id');
+    await docRef.set(data);
+    await setActiveListId(docRef.id);
     return newList;
   }
 
   Future<void> deleteList(String id) async {
-    final lists = await getAllLists();
-    lists.removeWhere((l) => l.id == id);
-    await saveLists(lists);
+    await _listsRef.doc(id).delete();
   }
 
   Future<void> updateList(ShoppingList list) async {
-    final lists = await getAllLists();
-    final idx = lists.indexWhere((l) => l.id == list.id);
-    if (idx != -1) {
-      lists[idx] = list;
-    } else {
-      lists.add(list);
-    }
-    await saveLists(lists);
+    final data = list.toJson()..remove('id');
+    await _listsRef.doc(list.id).set(data);
   }
 }

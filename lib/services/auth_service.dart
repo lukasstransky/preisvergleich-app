@@ -23,6 +23,10 @@ class AuthService {
       idToken: googleAuth.idToken,
     );
 
+    if (isAnonymous) {
+      final result = await _auth.currentUser!.linkWithCredential(credential);
+      return result.user;
+    }
     final result = await _auth.signInWithCredential(credential);
     return result.user;
   }
@@ -40,6 +44,11 @@ class AuthService {
       accessToken: appleCredential.authorizationCode,
     );
 
+    if (isAnonymous) {
+      final result =
+          await _auth.currentUser!.linkWithCredential(oauthCredential);
+      return result.user;
+    }
     final result = await _auth.signInWithCredential(oauthCredential);
     return result.user;
   }

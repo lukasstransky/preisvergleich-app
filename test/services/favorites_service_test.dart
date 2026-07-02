@@ -1,7 +1,9 @@
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preisvergleich_app/models/product.dart';
 import 'package:preisvergleich_app/services/favorites_service.dart';
+
+const _uid = 'test-uid';
 
 Product _product(String id, String name, {double price = 1.0}) => Product(
       id: id,
@@ -11,15 +13,19 @@ Product _product(String id, String name, {double price = 1.0}) => Product(
       supermarket: 'spar',
     );
 
+FavoritesService _makeService(FakeFirebaseFirestore firestore) =>
+    FavoritesService(firestore: firestore, getUid: () => _uid);
+
 void main() {
-  late FavoritesService service;
+  group('FavoritesService (Firestore)', () {
+    late FakeFirebaseFirestore firestore;
+    late FavoritesService service;
 
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
-    service = FavoritesService();
-  });
+    setUp(() {
+      firestore = FakeFirebaseFirestore();
+      service = _makeService(firestore);
+    });
 
-  group('FavoritesService', () {
     test('getFavorites returns empty list initially', () async {
       expect(await service.getFavorites(), isEmpty);
     });
@@ -80,6 +86,23 @@ void main() {
       expect(p.category, 'Molkerei');
       expect(p.sku, 'SKU-K');
       expect(p.imageUrl, 'https://example.com/kaese.jpg');
+    });
+
+    test('favorites are isolated per uid', () async {
+      final serviceA = FavoritesService(firestore: firestore, getUid: () => 'uid-a');
+      final serviceB = FavoritesService(firestore: firestore, getUid: () => 'uid-b');
+
+      await serviceA.saveFavorites([_product('p1', 'Milch')]);
+      expect(await serviceB.getFavorites(), isEmpty);
+    });
+
+    test('data persists when new service instance reads same uid', () async {
+      await service.saveFavorites([_product('p1', 'Milch')]);
+
+      final service2 = _makeService(firestore);
+      final loaded = await service2.getFavorites();
+      expect(loaded.length, 1);
+      expect(loaded.first.id, 'p1');
     });
   });
 }

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -133,6 +134,27 @@ class PriceAlertService implements PriceAlertServiceBase {
 
   @override
   Future<List<PriceAlert>> getAlerts() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    // Try loading by userId first (supports cross-device sync)
+    if (uid != null) {
+      try {
+        final snapshot = await _firestore
+            .collection('price_alerts')
+            .where('userId', isEqualTo: uid)
+            .where('active', isEqualTo: true)
+            .orderBy('createdAt', descending: true)
+            .get();
+        if (snapshot.docs.isNotEmpty) {
+          debugPrint('[PriceAlert] Loaded ${snapshot.docs.length} alerts by userId');
+          return snapshot.docs.map((doc) => PriceAlert.fromFirestore(doc)).toList();
+        }
+      } catch (e) {
+        debugPrint('[PriceAlert] getAlerts by userId error: $e');
+      }
+    }
+
+    // Fall back to deviceToken for alerts created before userId was added
     String? token;
     try {
       token = await getDeviceToken();
@@ -149,7 +171,7 @@ class PriceAlertService implements PriceAlertServiceBase {
           .where('active', isEqualTo: true)
           .orderBy('createdAt', descending: true)
           .get();
-      debugPrint('[PriceAlert] Loaded ${snapshot.docs.length} alerts from Firestore');
+      debugPrint('[PriceAlert] Loaded ${snapshot.docs.length} alerts by deviceToken');
       return snapshot.docs.map((doc) => PriceAlert.fromFirestore(doc)).toList();
     } catch (e) {
       debugPrint('[PriceAlert] Firestore getAlerts error: $e');
@@ -193,8 +215,9 @@ class PriceAlertService implements PriceAlertServiceBase {
       createdAt: DateTime.now(),
     );
 
+    final userId = FirebaseAuth.instance.currentUser?.uid;
     debugPrint('[PriceAlert] Creating alert for product ${product.id}...');
-    await _firestore.collection('price_alerts').add(alert.toFirestore(token!));
+    await _firestore.collection('price_alerts').add(alert.toFirestore(token!, userId: userId));
     debugPrint('[PriceAlert] Alert created successfully');
   }
 
@@ -221,7 +244,8 @@ class PriceAlertService implements PriceAlertServiceBase {
       category: category,
     );
 
-    await _firestore.collection('price_alerts').add(alert.toFirestore(token!));
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    await _firestore.collection('price_alerts').add(alert.toFirestore(token!, userId: userId));
   }
 
   @override

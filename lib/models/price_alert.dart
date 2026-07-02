@@ -67,8 +67,9 @@ class PriceAlert {
     );
   }
 
-  Map<String, dynamic> toFirestore(String deviceToken) => {
+  Map<String, dynamic> toFirestore(String deviceToken, {String? userId}) => {
         'deviceToken': deviceToken,
+        'userId': userId,
         'productId': productId,
         'productName': productName,
         'supermarket': supermarket,

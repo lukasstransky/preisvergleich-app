@@ -5,6 +5,7 @@ import 'home_screen.dart';
 import 'favorites_screen.dart';
 import 'price_alerts_screen.dart';
 import 'shopping_list_screen.dart';
+import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -25,6 +26,7 @@ class _MainScreenState extends State<MainScreen> {
       const FavoritesScreen(),
       PriceAlertsScreen(onGoToSearch: () => setState(() => _currentIndex = 0)),
       const ShoppingListScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -84,6 +86,11 @@ class _MainScreenState extends State<MainScreen> {
               child: const Icon(Icons.shopping_cart_rounded),
             ),
             label: 'Einkaufsliste',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: 'Profil',
           ),
         ],
       ),

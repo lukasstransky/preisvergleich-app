@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/product.dart';
 import '../models/shopping_list.dart';
@@ -16,17 +18,33 @@ class AppState extends ChangeNotifier {
   final PriceAlertServiceBase _priceAlertService;
   final FavoritesService _favoritesService;
 
+  String? _initializedForUid;
+  StreamSubscription<User?>? _authSubscription;
+  final String? Function() _getUid;
+
   AppState({
     AlgoliaServiceBase? algoliaService,
     ShoppingListService? shoppingListService,
     SearchHistoryService? searchHistoryService,
     PriceAlertServiceBase? priceAlertService,
     FavoritesService? favoritesService,
+    Stream<User?> Function()? authChanges,
+    String? Function()? getUid,
   })  : _algoliaService = algoliaService ?? AlgoliaService(),
         _shoppingListService = shoppingListService ?? ShoppingListService(),
         _searchHistoryService = searchHistoryService ?? SearchHistoryService(),
         _priceAlertService = priceAlertService ?? PriceAlertService(),
-        _favoritesService = favoritesService ?? FavoritesService();
+        _favoritesService = favoritesService ?? FavoritesService(),
+        _getUid = getUid ?? (() => FirebaseAuth.instance.currentUser?.uid) {
+    final stream = authChanges != null
+        ? authChanges()
+        : FirebaseAuth.instance.authStateChanges();
+    _authSubscription = stream.listen((user) {
+      if (user?.uid != _initializedForUid && user != null) {
+        initialize();
+      }
+    });
+  }
 
   // Search
   List<Product> _searchResults = [];
@@ -110,6 +128,9 @@ class AppState extends ChangeNotifier {
   ];
 
   Future<void> initialize() async {
+    final uid = _getUid();
+    if (uid == null) return;
+    _initializedForUid = uid;
     // _loadPriceAlerts() requests notification permission itself (via
     // getDeviceToken), so no separate requestPermission() call is needed here.
     await Future.wait([_loadLists(), _loadSearchHistory(), _loadPriceAlerts(), _loadFavorites()]);
@@ -440,6 +461,7 @@ class AppState extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _algoliaService.dispose();
     super.dispose();
   }
