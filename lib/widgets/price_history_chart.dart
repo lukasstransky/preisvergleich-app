@@ -64,7 +64,24 @@ class _PriceHistoryChartState extends State<PriceHistoryChart> {
           PriceHistoryEntry(price: widget.product.price, date: today));
     }
 
-    if (allEntries.length < 2) return const SizedBox.shrink();
+    if (allEntries.length < 2) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.show_chart_rounded, size: 16, color: c.textTertiary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Wir beobachten den Preis – der Verlauf erscheint, sobald er sich ändert.',
+                style: TextStyle(fontSize: 12, color: c.textSecondary),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     final prices = allEntries.map((e) => e.price).toList();
     final minP = prices.reduce(min);
