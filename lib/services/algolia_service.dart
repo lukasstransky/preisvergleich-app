@@ -98,6 +98,7 @@ final filters = filterParts.isNotEmpty ? filterParts.join(' AND ') : null;
           supermarket: data['supermarket'] ?? '',
           normalizedCategory: data['normalizedCategory'],
           nameLength: data['nameLength'],
+          productUrl: data['productUrl'],
         );
       }).toList();
 

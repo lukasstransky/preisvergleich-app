@@ -22,6 +22,16 @@ User erstellt Alarm  →  Firestore (price_alerts/{id})
 
 Beide Typen gibt es als **Produkt-Alarm** (spezifisches Produkt) und **Keyword-Alarm** (alle Produkte die auf ein Stichwort matchen).
 
+## Wann eine Push feuert (Trigger-Verhalten)
+
+Die Function prüft stündlich, benachrichtigt aber **nicht** jede Stunde erneut, solange die Bedingung erfüllt bleibt — sonst käme bei einem dauerhaften Angebot jede Stunde dieselbe Push. Zwei unterschiedliche Mechanismen:
+
+- **Produkt-Alarm** — Flanken-Logik über das Bool `conditionMet`. Push nur beim Übergang *nicht erfüllt → erfüllt*. Fällt die Bedingung weg (Angebot vorbei / Preis wieder über Zielpreis), wird `conditionMet` zurückgesetzt und der nächste Übergang feuert erneut.
+
+- **Keyword-Alarm** — Diff über die Menge der matchenden Produkt-IDs (`notifiedProductIds`). Push nur für Produkte, die **neu** hinzukommen. Grund: Bei breiten Keywords/Kategorien (z.B. „wodka") ist fast immer *irgendein* Produkt im Angebot; eine reine „gibt es Treffer?"-Flanke würde nur ein einziges Mal feuern und danach nie wieder. Die getrackte Menge wird jeden Lauf durch die aktuell matchende ersetzt — dadurch zählt ein Produkt, das aus dem Angebot fällt und später zurückkommt, wieder als neu. Die Push nennt die Anzahl neuer Treffer (kein Einzelpreis, da Keyword-Treffer nach Relevanz, nicht nach Preis sortiert sind).
+
+`lastTriggered` ist entsprechend „zuletzt benachrichtigt", **nicht** „zuletzt geprüft" — es wird nur bei einer tatsächlich versendeten Push gesetzt.
+
 ## Firestore-Struktur
 
 ```
@@ -35,6 +45,9 @@ price_alerts/{alertId}
   deviceToken: string     ← FCM-Token des Geräts das den Alarm erstellt hat
   active: bool
   createdAt: Timestamp
+  conditionMet: bool          ← nur Produkt-Alarm: Flanken-Status (siehe Trigger-Verhalten)
+  notifiedProductIds: string[] ← nur Keyword-Alarm: zuletzt gemeldete matchende Produkt-IDs
+  lastTriggered: Timestamp    ← Zeitpunkt der letzten versendeten Push
 ```
 
 `userId` wird beim Erstellen gesetzt (`FirebaseAuth.instance.currentUser?.uid`). Damit kann ein User seine Alarme auf mehreren Geräten sehen. Legacy-Alarme ohne `userId` werden per `deviceToken` abgefragt (Fallback).

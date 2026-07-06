@@ -287,6 +287,7 @@ class ProductCard extends StatelessWidget {
     if (!isInList) {
       return Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -328,6 +329,7 @@ class ProductCard extends StatelessWidget {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 2),
@@ -374,6 +376,7 @@ class ProductCard extends StatelessWidget {
   }
 
   void _showProductDetails(BuildContext context) {
+    context.read<AppState>().logProductViewed(product);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -588,6 +591,7 @@ class _ProductDetailSheet extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () async {
+                      context.read<AppState>().logProductLinkOpened(product);
                       final uri = Uri.tryParse(product.productUrl!);
                       if (uri != null) await launchUrl(uri);
                     },

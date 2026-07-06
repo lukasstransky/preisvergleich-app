@@ -12,7 +12,20 @@
           "package_name": "com.example.preisvergleich_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1055914421481-2abiahn71acm1hbhsvkru8dlsppabf4m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.preisvergleich_app",
+            "certificate_hash": "f76c02bee45c2fed16d6b7357a3d8baa5bab7ef2"
+          }
+        },
+        {
+          "client_id": "1055914421481-envrslqejdk97ed9q2cdtfi0dc5frsb0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDT-qEZz5hmwSJqfM69-FHsz55S69Ktcrk"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1055914421481-envrslqejdk97ed9q2cdtfi0dc5frsb0.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1055914421481-5n9kp1puaaj6ptdlub2374g1pgv5qvk1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.preisvergleichApp"
+              }
+            }
+          ]
         }
       }
     }

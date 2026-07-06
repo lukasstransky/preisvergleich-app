@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,8 +20,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Anonymous sign-in must NOT block the first frame: if it throws (e.g. the
+  // Anonymous provider is disabled) or hangs (no network at launch), awaiting it
+  // here would prevent runApp() and leave the user on a blank white screen.
+  // AppState listens to authStateChanges() and (re)initialises once the UID
+  // lands, so we kick sign-in off fire-and-forget and let the UI come up first.
   if (FirebaseAuth.instance.currentUser == null) {
-    await FirebaseAuth.instance.signInAnonymously();
+    unawaited(FirebaseAuth.instance.signInAnonymously().then<void>(
+      (_) {},
+      onError: (Object e) => debugPrint('Anonymous sign-in failed: $e'),
+    ));
   }
   // TODO(revenuecat): initialise the purchase SDK once API keys are set, e.g.
   //   await Purchases.configure(PurchasesConfiguration(revenueCatPublicKey));

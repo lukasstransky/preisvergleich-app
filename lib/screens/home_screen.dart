@@ -63,12 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final c = AppColors.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Preisvergleich'),
-        centerTitle: true,
-        actions: const [],
-      ),
-      body: Column(
+      body: SafeArea(child: Column(
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
@@ -102,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildResultsInfo(context, appState),
           Expanded(child: _buildProductList(context, appState)),
         ],
-      ),
+      )),
     );
   }
 

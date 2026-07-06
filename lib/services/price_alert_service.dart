@@ -195,6 +195,26 @@ class PriceAlertService implements PriceAlertServiceBase {
     return PriceAlert.fromFirestore(snapshot.docs.first);
   }
 
+  Future<String> _requireUserId() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // Anonymous sign-in may still be in flight (it's fire-and-forget in main.dart).
+      // Wait up to 10 s for auth to settle before giving up.
+      user = await FirebaseAuth.instance
+          .authStateChanges()
+          .where((u) => u != null)
+          .first
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => null,
+          );
+    }
+    if (user == null) {
+      throw Exception('Nicht angemeldet. Bitte starte die App neu.');
+    }
+    return user.uid;
+  }
+
   @override
   Future<void> createAlert({
     required Product product,
@@ -202,6 +222,7 @@ class PriceAlertService implements PriceAlertServiceBase {
     double? targetPrice,
   }) async {
     final token = await getDeviceToken(); // throws with descriptive message if unavailable
+    final userId = await _requireUserId();
 
     final alert = PriceAlert(
       id: '',
@@ -215,7 +236,6 @@ class PriceAlertService implements PriceAlertServiceBase {
       createdAt: DateTime.now(),
     );
 
-    final userId = FirebaseAuth.instance.currentUser?.uid;
     debugPrint('[PriceAlert] Creating alert for product ${product.id}...');
     await _firestore.collection('price_alerts').add(alert.toFirestore(token!, userId: userId));
     debugPrint('[PriceAlert] Alert created successfully');
@@ -229,6 +249,7 @@ class PriceAlertService implements PriceAlertServiceBase {
     String? category,
   }) async {
     final token = await getDeviceToken();
+    final userId = await _requireUserId();
 
     final alert = PriceAlert(
       id: '',
@@ -244,7 +265,6 @@ class PriceAlertService implements PriceAlertServiceBase {
       category: category,
     );
 
-    final userId = FirebaseAuth.instance.currentUser?.uid;
     await _firestore.collection('price_alerts').add(alert.toFirestore(token!, userId: userId));
   }
 

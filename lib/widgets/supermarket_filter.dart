@@ -36,6 +36,20 @@ class SupermarketFilter extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
             children: [
+              Opacity(
+                opacity: 0.45,
+                child: GestureDetector(
+                  onTap: () => _showDataInfoSheet(context),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Icon(
+                      Icons.info_outline_rounded,
+                      size: 16,
+                      color: c.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
               _AllChip(allSelected: allSelected),
               const SizedBox(width: 8),
               ...visibleSupermarkets.map((s) {
@@ -50,14 +64,6 @@ class SupermarketFilter extends StatelessWidget {
                   ),
                 );
               }),
-              GestureDetector(
-                onTap: () => _showDataInfoSheet(context),
-                child: Icon(
-                  Icons.info_outline_rounded,
-                  size: 16,
-                  color: c.textTertiary,
-                ),
-              ),
             ],
           ),
         ),

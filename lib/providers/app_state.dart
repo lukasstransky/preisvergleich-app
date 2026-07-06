@@ -250,7 +250,7 @@ class AppState extends ChangeNotifier {
       _error = null;
       await _searchHistoryService.addSearch(query.trim());
       _searchHistory = await _searchHistoryService.getHistory();
-      unawaited(_analytics.logSearch(query.trim()));
+      unawaited(_analytics.logSearch(query.trim(), _searchResults.length));
     } catch (e) {
       _error = 'Fehler bei der Suche: $e';
       _searchResults = [];
@@ -263,6 +263,17 @@ class AppState extends ChangeNotifier {
   void _triggerSearch() {
     if (_searchQuery.isNotEmpty) search(_searchQuery);
   }
+
+  /// Fired when a user opens a product's detail sheet — signals which products
+  /// and supermarkets actually draw interest.
+  void logProductViewed(Product product) => unawaited(
+      _analytics.logProductViewed(
+          product.id, product.supermarket, product.inPromotion));
+
+  /// Fired when a user taps through to the supermarket's own product page —
+  /// the strongest purchase-intent signal we have.
+  void logProductLinkOpened(Product product) => unawaited(
+      _analytics.logProductLinkOpened(product.id, product.supermarket));
 
   void clearSearch() {
     _searchQuery = '';

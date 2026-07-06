@@ -18,6 +18,51 @@ Parameter:
 
 ---
 
+### `search_performed` (Custom-Event)
+
+Ergänzt das Firebase-Standard-`search` um die Trefferzahl. Beide feuern gemeinsam aus `logSearch()`.
+
+| Wann | Bedingung |
+|---|---|
+| Nach jeder erfolgreichen Suche | Query ist nicht leer und Algolia hat geantwortet |
+
+Parameter:
+- `query` — der Suchbegriff (getrimmt)
+- `result_count` — Anzahl gefundener Produkte
+
+**Warum:** `result_count = 0` markiert Suchen, die ins Leere laufen — das direkteste Signal für Lücken in den Produktdaten (z. B. Begriffe, die es nur bei Diskontern ohne Vollkatalog gäbe). In BigQuery: `WHERE event_name = 'search_performed' AND result_count = 0`.
+
+---
+
+### `product_viewed`
+
+| Wann | Bedingung |
+|---|---|
+| Beim Öffnen des Produkt-Detail-Sheets | `_showProductDetails()` in [product_card.dart](../lib/widgets/product_card.dart) |
+
+Parameter:
+- `product_id`
+- `supermarket`
+- `in_promotion` — `1` wenn im Angebot, sonst `0`
+
+**Warum:** Zeigt, welche Produkte und Supermärkte tatsächlich Interesse wecken — und ob Angebote (`in_promotion = 1`) überproportional Klicks ziehen.
+
+---
+
+### `product_link_opened`
+
+| Wann | Bedingung |
+|---|---|
+| Beim Tippen auf „Auf &lt;Supermarkt&gt; ansehen" im Detail-Sheet | Produkt hat eine `productUrl` |
+
+Parameter:
+- `product_id`
+- `supermarket`
+
+**Warum:** Stärkstes Kaufabsicht-Signal — der User verlässt die App Richtung Kauf. Zeigt außerdem, welcher Markt bei „am billigsten" gewinnt.
+
+---
+
 ### `add_to_shopping_list`
 
 | Wann | Bedingung |

@@ -54,8 +54,12 @@ exports.checkPriceAlerts = onSchedule(
       }
     }
 
+    // Always commit: handlers also record state changes (e.g. tracked product
+    // sets, condition resets) that must persist even when no notification fires.
+    // Committing an empty batch is a harmless no-op.
+    await batch.commit();
+
     if (notifications.length > 0) {
-      await batch.commit();
       for (let i = 0; i < notifications.length; i += 500) {
         const chunk = notifications.slice(i, i + 500);
         console.log(`Sending ${chunk.length} notifications, tokens: ${chunk.map(n => n.token?.substring(0, 12) + '...').join(', ')}`);
@@ -149,7 +153,7 @@ async function _handleProductAlert(doc, alert, index, batch, notifications) {
       alert.deviceToken,
       conditionNowMet.title,
       conditionNowMet.body,
-      { productId: alert.productId, alertId: doc.id }
+      { productId: alert.productId, productName: alert.productName, alertId: doc.id }
     ));
     batch.update(doc.ref, {
       conditionMet: true,
@@ -177,53 +181,88 @@ async function _handleKeywordAlert(doc, alert, index, batch, notifications) {
   const result = await index.search(alert.keyword, {
     filters,
     facetFilters,
-    hitsPerPage: 5,
-    attributesToRetrieve: ['name', 'price', 'supermarket'],
+    hitsPerPage: 50,
+    attributesToRetrieve: ['objectID'],
   });
 
-  const conditionNowMet = result.hits.length > 0;
-  const wasConditionMet = alert.conditionMet === true;
+  // Products that currently match the alert (on offer / under target price).
+  const currentIds = result.hits.map((h) => h.objectID);
+  // Products we already notified about on a previous run.
+  const previousSet = new Set(
+    Array.isArray(alert.notifiedProductIds) ? alert.notifiedProductIds : []
+  );
 
-  if (conditionNowMet && !wasConditionMet) {
-    // Condition newly became true → notify
-    const best = result.hits[0];
-    const bestPrice = `€${Number(best.price).toFixed(2)} (${_capitalize(best.supermarket)})`;
-    const more = result.hits.length > 1 ? ` · +${result.hits.length - 1} weitere` : '';
+  // Only notify for products that are newly matching — not ones we already
+  // reported. This avoids re-notifying for a broad category (e.g. "wodka")
+  // where there is almost always *some* product on offer.
+  const newIds = currentIds.filter((id) => !previousSet.has(id));
 
-    const body = alert.alertType === 'promotion'
-      ? `${result.hits.length} Angebote · ab ${bestPrice}${more}`
-      : `${result.hits.length} Produkte unter €${Number(alert.targetPrice).toFixed(2)} · ab ${bestPrice}${more}`;
+  // Did the tracked set change at all? We persist the current set even without
+  // a notification so a product that drops out and later returns counts as new
+  // again. (currentIds shorter, or membership differs.)
+  const setChanged =
+    currentIds.length !== previousSet.size ||
+    currentIds.some((id) => !previousSet.has(id));
+
+  if (newIds.length > 0) {
+    // A keyword can match many products and hits are ranked by relevance, not
+    // price — so we report the count of new matches rather than one hit's price
+    // (that would imply a precision we don't have). The target price we quote is
+    // the user's own value, which is always accurate.
+    const count = newIds.length;
+    let title;
+    let body;
+    if (alert.alertType === 'promotion') {
+      title = '🔥 Neues Angebot!';
+      body = count === 1
+        ? `Ein neuer Treffer für "${alert.keyword}" ist im Angebot 🛒`
+        : `${count} neue Angebote für "${alert.keyword}" 🛒`;
+    } else {
+      title = '🎯 Zielpreis erreicht!';
+      body = count === 1
+        ? `Ein neuer Treffer für "${alert.keyword}" liegt unter ${_formatPrice(alert.targetPrice)} 💶`
+        : `${count} neue Treffer für "${alert.keyword}" unter ${_formatPrice(alert.targetPrice)} 💶`;
+    }
+
+    const data = { keyword: alert.keyword, alertId: doc.id };
+    if (alert.category) data.category = alert.category;
 
     notifications.push(_buildNotification(
       alert.deviceToken,
-      `🔔 "${alert.keyword}" – Preisalarm`,
+      title,
       body,
-      { keyword: alert.keyword, alertId: doc.id }
+      data
     ));
     batch.update(doc.ref, {
-      conditionMet: true,
+      notifiedProductIds: currentIds,
       lastTriggered: FieldValue.serverTimestamp(),
     });
-  } else if (!conditionNowMet && wasConditionMet) {
-    // No more matching results → reset
-    batch.update(doc.ref, { conditionMet: false });
+  } else if (setChanged) {
+    // No new matches, but some offers ended → keep the tracked set in sync so
+    // returning offers are treated as new later. No notification.
+    batch.update(doc.ref, { notifiedProductIds: currentIds });
   }
 }
 
 function _checkCondition(alert, currentPrice, inPromotion) {
   if (alert.alertType === 'promotion' && inPromotion) {
     return {
-      title: '🔔 Preisalarm',
-      body: `${alert.productName} ist jetzt im Angebot für €${currentPrice.toFixed(2)}!`,
+      title: '🔥 Jetzt im Angebot!',
+      body: `${alert.productName} ist reduziert – jetzt für ${_formatPrice(currentPrice)} 🛒`,
     };
   }
   if (alert.alertType === 'target_price' && alert.targetPrice != null && currentPrice <= alert.targetPrice) {
     return {
-      title: '🔔 Preisalarm',
-      body: `${alert.productName} kostet jetzt €${currentPrice.toFixed(2)} – unter deinem Ziel von €${Number(alert.targetPrice).toFixed(2)}!`,
+      title: '🎯 Zielpreis erreicht!',
+      body: `${alert.productName} kostet jetzt nur ${_formatPrice(currentPrice)} 💶`,
     };
   }
   return null;
+}
+
+// Formats a numeric price as an Austrian/German euro string, e.g. 3.5 → "€3,50".
+function _formatPrice(value) {
+  return `€${Number(value).toFixed(2).replace('.', ',')}`;
 }
 
 function _buildNotification(token, title, body, data) {

@@ -59,6 +59,19 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     final appState = context.watch<AppState>();
+
+    // Sync controller when search is triggered externally (e.g. notification tap)
+    final externalQuery = appState.searchQuery;
+    if (_controller.text != externalQuery && !_focusNode.hasFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _controller.text != externalQuery) {
+          _controller.text = externalQuery;
+          _controller.selection =
+              TextSelection.fromPosition(TextPosition(offset: externalQuery.length));
+        }
+      });
+    }
+
     final hasText = _controller.text.isNotEmpty;
 
     return Column(
