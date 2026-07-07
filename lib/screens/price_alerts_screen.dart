@@ -7,8 +7,10 @@ import '../theme/app_colors.dart';
 
 class PriceAlertsScreen extends StatelessWidget {
   final VoidCallback? onGoToSearch;
+  final void Function(String query, bool onlyPromotions, String? category)?
+      onOpenSearch;
 
-  const PriceAlertsScreen({super.key, this.onGoToSearch});
+  const PriceAlertsScreen({super.key, this.onGoToSearch, this.onOpenSearch});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +73,10 @@ class PriceAlertsScreen extends StatelessWidget {
                   child: _SearchPromoBanner(onGoToSearch: onGoToSearch),
                 );
               }
-              return _AlertTile(alert: alerts[index - 1]);
+              return _AlertTile(
+                alert: alerts[index - 1],
+                onOpenSearch: onOpenSearch,
+              );
             },
           );
         },
@@ -163,12 +168,73 @@ class _SearchPromoBanner extends StatelessWidget {
   }
 }
 
+/// Thumbnail for a keyword alert: shows the top search result's image once
+/// loaded, and a styled search icon as placeholder / fallback when there is no
+/// image (or the lookup fails).
+class _KeywordThumbnail extends StatefulWidget {
+  final String keyword;
+
+  const _KeywordThumbnail({required this.keyword});
+
+  @override
+  State<_KeywordThumbnail> createState() => _KeywordThumbnailState();
+}
+
+class _KeywordThumbnailState extends State<_KeywordThumbnail> {
+  String? _url;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final url = await context.read<AppState>().keywordThumbnail(widget.keyword);
+    if (mounted) setState(() => _url = url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+    if (_url != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: CachedNetworkImage(
+          imageUrl: _url!,
+          width: 60,
+          height: 60,
+          fit: BoxFit.cover,
+          placeholder: (_, _) => _iconFallback(c),
+          errorWidget: (_, _, _) => _iconFallback(c),
+        ),
+      );
+    }
+    return _iconFallback(c);
+  }
+
+  Widget _iconFallback(AppColors c) => Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: c.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(Icons.search, color: c.primary, size: 28),
+      );
+}
+
 class _AlertTile extends StatelessWidget {
   final PriceAlert alert;
+  final void Function(String query, bool onlyPromotions, String? category)?
+      onOpenSearch;
 
-  const _AlertTile({required this.alert});
+  const _AlertTile({required this.alert, this.onOpenSearch});
 
   Color _getSupermarketColor(String supermarket) => AppColors.supermarket(supermarket);
+
+  String get _searchTerm =>
+      alert.isKeywordAlert ? (alert.keyword ?? alert.productName) : alert.productName;
 
   @override
   Widget build(BuildContext context) {
@@ -176,20 +242,21 @@ class _AlertTile extends StatelessWidget {
     final appState = context.read<AppState>();
 
     return Card(
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onOpenSearch == null
+            ? null
+            : () => onOpenSearch!(
+                  _searchTerm,
+                  alert.alertType == AlertType.promotion,
+                  alert.category,
+                ),
+        child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
             if (alert.isKeywordAlert)
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: c.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.search, color: c.primary, size: 28),
-              )
+              _KeywordThumbnail(keyword: _searchTerm)
             else if (alert.imageUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -329,6 +396,7 @@ class _AlertTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

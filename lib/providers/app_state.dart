@@ -75,6 +75,10 @@ class AppState extends ChangeNotifier {
   List<PriceAlert> _priceAlerts = [];
   final Map<String, PriceAlert> _alertsByProductId = {};
   final Map<String, PriceAlert> _alertsByKeyword = {};
+  // A keyword alert has no single product, so we show the image of the current
+  // top search result as a representative thumbnail. Cached per keyword to avoid
+  // re-querying Algolia every time the Alarme list rebuilds.
+  final Map<String, String?> _keywordThumbnailCache = {};
 
   // Favorites
   List<Product> _favorites = [];
@@ -264,6 +268,21 @@ class AppState extends ChangeNotifier {
     if (_searchQuery.isNotEmpty) search(_searchQuery);
   }
 
+  /// Representative thumbnail for a keyword alert: the image of the current top
+  /// search result for that keyword. Returns null if nothing matches. Cached.
+  Future<String?> keywordThumbnail(String keyword) async {
+    final key = keyword.toLowerCase();
+    if (_keywordThumbnailCache.containsKey(key)) return _keywordThumbnailCache[key];
+    try {
+      final result = await _algoliaService.searchProducts(query: keyword, hitsPerPage: 1);
+      final url = result.products.isNotEmpty ? result.products.first.imageUrl : null;
+      _keywordThumbnailCache[key] = url;
+      return url;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Fired when a user opens a product's detail sheet — signals which products
   /// and supermarkets actually draw interest.
   void logProductViewed(Product product) => unawaited(
@@ -313,6 +332,16 @@ class AppState extends ChangeNotifier {
       _triggerSearch();
       notifyListeners();
     }
+  }
+
+  /// Opens a search triggered from a price alert. A promotion alert only ever
+  /// fires on offers, so we switch the "Angebot" filter on; a target-price alert
+  /// can be met without a promotion, so we switch it off to not hide valid hits.
+  Future<void> searchFromAlert(String query,
+      {required bool onlyPromotions, String? category}) async {
+    _onlyPromotions = onlyPromotions;
+    _selectedCategory = category;
+    await search(query);
   }
 
   void toggleOnlyPromotions() {

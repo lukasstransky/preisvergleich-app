@@ -40,10 +40,21 @@ class _MainScreenState extends State<MainScreen> {
     final query = keyword ?? productName;
     if (query == null || query.isEmpty) return;
 
+    // Reproduce the alert's filter so the opened search matches what triggered
+    // the notification: promotion alerts only fire on offers, so switch the
+    // "Angebot" filter on; a target-price alert can be met without a promotion,
+    // so leave it off. Category, if the alert had one, is applied too.
+    final onlyPromotions = data['alertType'] == 'promotion';
+    final category = data['category'] as String?;
+
     // Switch to home tab and trigger search
     setState(() => _currentIndex = 0);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AppState>().search(query);
+      context.read<AppState>().searchFromAlert(
+            query,
+            onlyPromotions: onlyPromotions,
+            category: category,
+          );
     });
   }
 
@@ -54,7 +65,19 @@ class _MainScreenState extends State<MainScreen> {
     final screens = [
       const HomeScreen(),
       const FavoritesScreen(),
-      PriceAlertsScreen(onGoToSearch: () => setState(() => _currentIndex = 0)),
+      PriceAlertsScreen(
+        onGoToSearch: () => setState(() => _currentIndex = 0),
+        onOpenSearch: (query, onlyPromotions, category) {
+          setState(() => _currentIndex = 0);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<AppState>().searchFromAlert(
+                  query,
+                  onlyPromotions: onlyPromotions,
+                  category: category,
+                );
+          });
+        },
+      ),
       const ShoppingListScreen(),
       const ProfileScreen(),
     ];

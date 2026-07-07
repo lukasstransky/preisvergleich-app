@@ -10,12 +10,19 @@ const db = getFirestore();
 const ALGOLIA_INDEX = 'products';
 
 /**
- * Runs every hour. Checks all active price alerts and sends FCM notifications
- * when conditions are met. Supports both product-level and keyword-level alerts.
+ * Runs once a day at 11:00 (Europe/Vienna). Checks all active price alerts and
+ * sends FCM notifications when conditions are met. Supports both product-level
+ * and keyword-level alerts.
+ *
+ * Daily (not hourly) because the source data is only refreshed once a day by the
+ * morning scrapers — prices cannot change in between, so more frequent checks
+ * would just burn Algolia search requests for no benefit. 11:00 is chosen for
+ * notification delivery: high open rates around lunch, and the whole rest of the
+ * day for the user to act on a deal before shops close.
  */
 exports.checkPriceAlerts = onSchedule(
   {
-    schedule: 'every 60 minutes',
+    schedule: 'every day 11:00',
     timeZone: 'Europe/Vienna',
     secrets: ['ALGOLIA_APP_ID', 'ALGOLIA_API_KEY'],
     memory: '256MiB',
@@ -153,7 +160,7 @@ async function _handleProductAlert(doc, alert, index, batch, notifications) {
       alert.deviceToken,
       conditionNowMet.title,
       conditionNowMet.body,
-      { productId: alert.productId, productName: alert.productName, alertId: doc.id }
+      { productId: alert.productId, productName: alert.productName, alertId: doc.id, alertType: alert.alertType }
     ));
     batch.update(doc.ref, {
       conditionMet: true,
@@ -224,7 +231,7 @@ async function _handleKeywordAlert(doc, alert, index, batch, notifications) {
         : `${count} neue Treffer für "${alert.keyword}" unter ${_formatPrice(alert.targetPrice)} 💶`;
     }
 
-    const data = { keyword: alert.keyword, alertId: doc.id };
+    const data = { keyword: alert.keyword, alertId: doc.id, alertType: alert.alertType };
     if (alert.category) data.category = alert.category;
 
     notifications.push(_buildNotification(

@@ -136,7 +136,11 @@ class PriceAlertService implements PriceAlertServiceBase {
   Future<List<PriceAlert>> getAlerts() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
-    // Try loading by userId first (supports cross-device sync)
+    // Signed-in users own every alert they can see via the `userId` field, so
+    // this query is the only one the security rules can authorize. We must NOT
+    // fall through to the deviceToken query below: it is not constrained by
+    // `userId`, so Firestore rejects the whole query with permission-denied —
+    // which surfaced as a spurious error right after an alert was created OK.
     if (uid != null) {
       try {
         final snapshot = await _firestore
@@ -145,16 +149,16 @@ class PriceAlertService implements PriceAlertServiceBase {
             .where('active', isEqualTo: true)
             .orderBy('createdAt', descending: true)
             .get();
-        if (snapshot.docs.isNotEmpty) {
-          debugPrint('[PriceAlert] Loaded ${snapshot.docs.length} alerts by userId');
-          return snapshot.docs.map((doc) => PriceAlert.fromFirestore(doc)).toList();
-        }
+        debugPrint('[PriceAlert] Loaded ${snapshot.docs.length} alerts by userId');
+        return snapshot.docs.map((doc) => PriceAlert.fromFirestore(doc)).toList();
       } catch (e) {
         debugPrint('[PriceAlert] getAlerts by userId error: $e');
+        return [];
       }
     }
 
-    // Fall back to deviceToken for alerts created before userId was added
+    // Fall back to deviceToken only for unauthenticated sessions (legacy,
+    // pre-lazy-auth alerts that predate the `userId` field).
     String? token;
     try {
       token = await getDeviceToken();
@@ -273,6 +277,6 @@ class PriceAlertService implements PriceAlertServiceBase {
     await _firestore
         .collection('price_alerts')
         .doc(alertId)
-        .update({'active': false});
+        .delete();
   }
 }
